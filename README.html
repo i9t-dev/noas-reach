@@ -1,0 +1,128 @@
+<html>
+
+<head>
+    <title>
+        Noah's Reach
+    </title>
+    <link rel="stylesheet" href="https://unpkg.com/spcss">
+</head>
+
+<body onload="unspoil()">
+
+    <style>
+        .shown {
+            display: block;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+
+    <script>
+        function spoil() {
+            // Show spoiler
+            window.document.querySelector(".spoiler").classList.add('shown');
+            window.document.querySelector(".spoiler").classList.remove('hidden');
+
+            // Hide spoil button
+            window.document.querySelector(".spoil-button").classList.add('hidden');
+            window.document.querySelector(".spoil-button").classList.remove('shown');
+
+            // Show unspoil button
+            window.document.querySelector(".unspoil-button").classList.add('shown')
+            window.document.querySelector(".unspoil-button").classList.remove('hidden')
+        }
+        function unspoil() {
+            // Hide spoiler
+            window.document.querySelector(".spoiler").classList.add('hidden');
+            window.document.querySelector(".spoiler").classList.remove('shown');
+
+            // Show spoil button
+            window.document.querySelector(".spoil-button").classList.add('shown');
+            window.document.querySelector(".spoil-button").classList.remove('hidden');
+
+            // Hide unspoil button
+            window.document.querySelector(".unspoil-button").classList.add('hidden')
+            window.document.querySelector(".unspoil-button").classList.remove('shown')
+        }
+    </script>
+
+    <h1>Noah's Reach</h1>
+
+    Noah's Reach (<code>noasreach</code>) is a <a href="https://civicrm.org">CiviCRM</a> extension to manage your
+    professional relationships.
+
+    <h2>Install</h2>
+
+    TBD
+
+    <h2>Use</h2>
+
+    TBD
+
+    <h2>Install</h2>
+
+    TBD
+
+    <h2>Why Noah's Reach?</h2>
+
+    <blockquote>
+        <p>
+            Once there was an octopus, call him Noah, whose people had suffered (...) a raging infection that tore them
+            apart, (...) while some sought to rebuild a new stability in orbit, many others felt that the infection
+            would jump to them eventually, quarantine how they might...
+        </p>
+
+        <p>
+            And Noah saw it and despaired.
+        </p>
+
+        <p>
+            <button class="spoil-button" onclick="spoil()">⚠️ Expand spoiler</button>
+        </p>
+        <p>
+            <button class="unspoil-button" onclick="unspoil()">
+                😌 Collapse spoiler
+            </button>
+        </p>
+
+        <div class="spoiler">
+            <p>
+                Just like his distant ancestors chafing against the close confines of their tanks, he thought, I need to
+                escape. And Noah knew - or his Reach did - that the universe was vast, and that anywhere he might want
+                to flee to was unimaginably far away. And, impatient to be gone, his Reach threw out such long-term
+                plans as cold sleep and generation ships in favour of...
+            </p>
+            <p>
+                This.
+            </p>
+            <p>
+                Space is an ocean, in this sense. It has waves and currents, and while there are hard and absolute
+                limits to the speeds that objects can move through space, such limits do not apply to space itself.
+            </p>
+            <p>
+                When they test Noah's device, it vanishes instantly.
+            </p>
+            <p>
+                The octopus scientists are split, (...) their instruments cannot yet test the principles that they are
+                deploying, a common problem given the leap-of-inspiration nature of cephalopod science.
+            </p>
+            <p>
+                A year later, however, the signal will reach them from a light year out in the void. The device arrived
+                successfully, having manipulated the expansion rates of the space immediately before and behind it to
+                travel the distance in a matter of subjective hours.
+                No return trip had been planned, however, and the actual signal will be forced to travel the
+                old-fashioned way, under the stern eye of a relativity that does not even realize it has been tricked.
+            </p>
+
+        </div>
+
+        <p>
+            <cite>— Adrian Tchaikovski, Children of Ruin</cite>
+        </p>
+    </blockquote>
+
+</body>
+
+</html>
