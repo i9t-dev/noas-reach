@@ -2,7 +2,7 @@
 
 <head>
     <title>
-        Noah's Reach
+        Noasreach
     </title>
     <link rel="stylesheet" href="spcss.css">
 </head>
@@ -11,7 +11,7 @@
 
     <style>
         .shown {
-            display: block;
+            display: inlin-block;
         }
 
         .hidden {
@@ -22,43 +22,61 @@
     <script>
         function spoil() {
             // Show spoiler
-            window.document.querySelector(".spoiler").classList.add('shown');
-            window.document.querySelector(".spoiler").classList.remove('hidden');
+            window.document.querySelectorAll(".spoiler")
+                .forEach(e => e.classList.add('shown'))
+            window.document.querySelectorAll(".spoiler")
+                .forEach(e => e.classList.remove('hidden'))
 
             // Hide spoil button
-            window.document.querySelector(".spoil-button").classList.add('hidden');
-            window.document.querySelector(".spoil-button").classList.remove('shown');
+            window.document.querySelectorAll(".spoil-button")
+                .forEach(e => e.classList.add('hidden'))
+            window.document.querySelectorAll(".spoil-button")
+                .forEach(e => e.classList.remove('shown'))
 
             // Show unspoil button
-            window.document.querySelector(".unspoil-button").classList.add('shown')
-            window.document.querySelector(".unspoil-button").classList.remove('hidden')
+            window.document.querySelectorAll(".unspoil-button")
+                .forEach(e => e.classList.add('shown'))
+            window.document.querySelectorAll(".unspoil-button")
+                .forEach(e => e.classList.remove('hidden'))
         }
         function unspoil() {
             // Hide spoiler
-            window.document.querySelector(".spoiler").classList.add('hidden');
-            window.document.querySelector(".spoiler").classList.remove('shown');
+            window.document.querySelectorAll(".spoiler")
+                .forEach(e => e.classList.add('hidden'))
+            window.document.querySelectorAll(".spoiler")
+                .forEach(e => e.classList.remove('shown'))
 
             // Show spoil button
-            window.document.querySelector(".spoil-button").classList.add('shown');
-            window.document.querySelector(".spoil-button").classList.remove('hidden');
+            window.document.querySelectorAll(".spoil-button")
+                .forEach(e => e.classList.add('shown'))
+            window.document.querySelectorAll(".spoil-button")
+                .forEach(e => e.classList.remove('hidden'))
 
             // Hide unspoil button
-            window.document.querySelector(".unspoil-button").classList.add('hidden')
-            window.document.querySelector(".unspoil-button").classList.remove('shown')
+            window.document.querySelectorAll(".unspoil-button")
+                .forEach(e => e.classList.add('hidden'))
+            window.document.querySelectorAll(".unspoil-button")
+                .forEach(e => e.classList.remove('shown'))
         }
     </script>
 
-    <h1>Noah's Reach</h1>
+    <h1>Noasreach</h1>
 
     <blockquote>
-        Noah's Reach is an app to manage professional relationships
+        Noasreach is a standalone app to manage professional relationships
     </blockquote>
 
-    It's implemented as a <a href="https://civicrm.org">CiviCRM</a> extension (<code>noasreach</code>). On top of a plain CiviCRM standalone instance, it provides the following features:
+    Features (✅: implemented, 🚧: work in progress, 🔮: planned):
 
     <ul>
-        <li>Dynamic search form</li>
-        <li>Graph view of your relationships</li>
+        <li>🚧 Provide all the features of a plain CiviCRM standalone instance regarding contact, relationship and event management</li>
+        <li>🔮 Install as a <a href="https://civicrm.org">CiviCRM</a> extension (<code>noasreach</code>)</li>
+        <li>🔮 Show a graph view of the relationships between contacts</li>
+        <li>🔮 Find contacts via a dynamic search form</li>
+        <li>🔮 Present search results as a table</li>
+        <li>🔮 Perform advanced view operations: filtering, ordering, grouping</li>
+        <li>🔮 Install as a standalone server-less desktop application</li>
+        <li>🔮 Install as a mobile app</li>
     </ul>
 
     <h2>Install</h2>
@@ -77,28 +95,33 @@
 
     <blockquote>
         <p>
-            Once there was an octopus, call him Noah, whose people had suffered (...) a raging infection that tore them
-            apart, (...) while some sought to rebuild a new stability in orbit, many others felt that the infection
-            would jump to them eventually, quarantine how they might...
+            Paul, then: his own arm-driven undermind (<em>his Reach</em>, as opposed to the Crown of his central brain
+            or the Guise of his skin)
         </p>
 
         <p>
+            <cite>— Adrian Tchaikovski, Children of Ruin, p. 139</cite>
+        </p>
+    </blockquote>
+
+    <blockquote>
+        <p>
+            Once there was an octopus, call him Noah, <button class="spoil-button" onclick="spoil()">⚠️ Expand
+                spoiler</button><span class="spoiler"> whose people had suffered (...) a raging infection that tore
+                them
+                apart, (...) while some sought to rebuild a new stability in orbit, many others felt that the infection
+                would jump to them eventually, quarantine how they might...</span>
+        </p>
+
+        <p class="spoiler">
             And Noah saw it and despaired.
-        </p>
-
-        <p>
-            <button class="spoil-button" onclick="spoil()">⚠️ Expand spoiler</button>
-        </p>
-        <p>
-            <button class="unspoil-button" onclick="unspoil()">
-                😌 Collapse spoiler
-            </button>
         </p>
 
         <div class="spoiler">
             <p>
                 Just like his distant ancestors chafing against the close confines of their tanks, he thought, I need to
-                escape. And Noah knew - or his Reach did - that the universe was vast, and that anywhere he might want
+                escape. And <em>Noah knew - or his Reach did</em> - that the universe was vast, and that anywhere he
+                might want
                 to flee to was unimaginably far away. And, impatient to be gone, his Reach threw out such long-term
                 plans as cold sleep and generation ships in favour of...
             </p>
@@ -127,8 +150,15 @@
         </div>
 
         <p>
-            <cite>— Adrian Tchaikovski, Children of Ruin</cite>
+            <button class="unspoil-button" onclick="unspoil()">
+                😌 Collapse spoiler
+            </button>
         </p>
+
+        <p>
+            <cite>— Adrian Tchaikovski, Children of Ruin, p. 555</cite>
+        </p>
+
     </blockquote>
 
 </body>
