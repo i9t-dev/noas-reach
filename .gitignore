@@ -1,0 +1,7 @@
+core
+civicrm.standalone.php
+index.php
+private
+public
+.ddev
+.htaccess
