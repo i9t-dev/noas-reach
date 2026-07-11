@@ -1,15 +1,11 @@
 
-## Install
+## Install, use
 
-TBD 
-
-## Use
-
-TBD
+See <https://i9t-dev.github.io/noas-reach>.
 
 ## Hack
 
-Set up the base CiviCRM instance using DDEV:
+Set up the base [CiviCRM](https://civicrm.org/) instance using [DDEV](https://ddev.com/):
 
 ```shell-session
 chrp@macbook-pro-de-christophe noas-reach % ./ddev-civicrm-setup.sh
@@ -22,7 +18,7 @@ Creating file /var/www/html/private/civicrm.settings.php
 Creating civicrm_* database tables in db
 ```
 
-To ensure the development environment works offline, set up the `/etc/hosts` file:
+Set up the `/etc/hosts` file, to ensure the development environment works offline:
 
 ```shell-session
 chrp@macbook-pro-de-christophe noas-reach % ddev hostname
