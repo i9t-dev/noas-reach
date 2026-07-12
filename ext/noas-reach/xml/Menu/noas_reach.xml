@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<menu>
+  <item>
+    <path>civicrm/noas-index-page</path>
+    <page_callback>CRM_NoasReach_Page_NoasIndexPage</page_callback>
+    <title>NoasIndexPage</title>
+    <access_arguments>access CiviCRM</access_arguments>
+  </item>
+</menu>
