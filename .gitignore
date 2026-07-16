@@ -6,3 +6,4 @@ public
 .ddev
 .htaccess
 .vscode
+**/.DS_Store
