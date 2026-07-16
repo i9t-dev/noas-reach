@@ -1,0 +1,19 @@
+.shown {
+    display: inlin-block;
+}
+
+.hidden {
+    display: none;
+}
+
+.art {
+    float: right;
+    width: 30%;
+}
+
+body {
+    margin: 2rem !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    max-width: max-content !important;
+}
