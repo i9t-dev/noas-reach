@@ -8,3 +8,4 @@ public
 .vscode
 **/.DS_Store
 .DS_Store
+ext/noas-reach/node_modules
