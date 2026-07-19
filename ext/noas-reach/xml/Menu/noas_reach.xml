@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <menu>
   <item>
-    <path>civicrm/hello-world</path>
-    <page_callback>CRM_NoasReach_Page_HelloWorld</page_callback>
-    <title>HelloWorld</title>
+    <path>civicrm/app</path>
+    <page_callback>CRM_NoasReach_Page_App</page_callback>
+    <title>App</title>
     <access_arguments>access CiviCRM</access_arguments>
   </item>
 </menu>

@@ -2,7 +2,7 @@ const path = require('path');
 
 module.exports = {
   mode: 'production',
-  entry: './js/src/HelloWorld.tsx',
+  entry: './js/src/App.tsx',
   module: {
     rules: [
       {
@@ -25,7 +25,7 @@ module.exports = {
     extensions: ['.tsx', '.ts', '.js'],
   },
   output: {
-    filename: 'noas-reach-helloworld.js',
+    filename: 'app.js',
     path: path.resolve(__dirname, 'js/dist'),
   },
 };
