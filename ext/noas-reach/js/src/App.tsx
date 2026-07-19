@@ -42,18 +42,30 @@ enum AppEvent {
   SearchClicked,
 }
 
-type AppEventHandler = (model: AppModel, args: any) => AppModel
+enum AppEffect {
+  NoOp,
+}
 
-const handlers: Record<AppEvent, AppEventHandler> = {
-  [AppEvent.QueryChanged]: (model, args) => {
+type AppChange = {
+  model: AppModel,
+  effect: AppEffect,
+}
+
+type AppEventHandler = (model: AppModel, arg: any) => AppChange
+
+const eventHandlers: Record<AppEvent, AppEventHandler> = {
+  [AppEvent.QueryChanged]: (model, arg) => {
     return {
-      ...model,
-      query: args.query
+      model: {
+        ...model,
+        query: arg.query
+      },
+      effect: AppEffect.NoOp,
     }
   },
   [AppEvent.SearchClicked]: (model, _) => {
     console.log(`TODO: Launch search with query: ${model.query}`)
-    return model
+    return { model: model, effect: AppEffect.NoOp }
   },
 }
 
@@ -61,14 +73,20 @@ const handlers: Record<AppEvent, AppEventHandler> = {
 
 const [model, setModel] = useState<AppModel>(initialModel)
 
-useEffect(() => {
-  // TODO: Implement effects
-}, [model])
+type AppEffectHandler = (effect: AppEffect, arg: any) => void
 
-function dispatch(event: AppEvent, args: any): undefined {
-  const handleEvent = handlers[event]
-  const newModel = handleEvent(model, args)
-  setModel(newModel)
+const effectHandlers: Record<AppEffect, AppEffectHandler> = {
+  [AppEffect.NoOp]: (_effect, _arg) => {
+    // No op
+  }
+}
+
+function dispatch(event: AppEvent, eventArg: any): undefined {
+  const handleEvent = eventHandlers[event]
+  const change = handleEvent(model, eventArg)
+  setModel(change.model)
+  const handleEffect = effectHandlers[change.effect]
+  handleEffect(change.effect, {})
 }
 
 declare global {
