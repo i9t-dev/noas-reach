@@ -27,16 +27,23 @@ function view(
     <h2>Hello, this is {model.name}!</h2>
     <fieldset>
       <legend>Find contacts</legend>
-      <p>
-        <label>Query</label>
-        <input type="text"
-          autoFocus
-          value={model.query}
-          onChange={() => { dispatch(AppEvent.QueryChanged, "TBD") }}></input>
-      </p>
-      <p>
-        <button onClick={() => { dispatch(AppEvent.SearchClicked, {}) }}>Search</button>
-      </p>
+      <label>Query</label>
+      <input type="text"
+        autoFocus
+        value={model.query}
+        onChange={
+          (event) => {
+            dispatch(AppEvent.QueryChanged, event.target.value)
+          }
+        }></input>
+      <button
+        onClick={
+          () => {
+            dispatch(AppEvent.SearchClicked, {})
+          }
+        }>
+        Search
+      </button>
     </fieldset>
   </div>
 }
