@@ -8,7 +8,7 @@
   document.addEventListener('DOMContentLoaded', function() {
     if (typeof initApp === 'function') {
       console.log("App init function found")
-      initApp('noas-reach-container', { name: 'Noah\'s Reach' });
+      initApp('noas-reach-container');
     } else {
       console.log("App init function missing")
     }
