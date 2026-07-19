@@ -2,7 +2,7 @@ import React, { useEffect } from 'react'
 import ReactDOM from 'react-dom/client'
 import { useState } from 'react'
 
-//-- Model ----------------------------------------------------------//
+//-- Model --//
 
 type AppModel = {
   query: string,
@@ -10,7 +10,7 @@ type AppModel = {
 
 const initialModel = { query: "" }
 
-//-- View -----------------------------------------------------------//
+//-- View --//
 
 interface AppProps {
   name?: string
@@ -25,7 +25,7 @@ const App = ({ name = 'Noah\'s Reach' }) => {
         <p>
           <label>Query</label>
           <input type="text" autoFocus
-            onChange={dispatch(AppEvent.QueryChanged, {})}></input>
+            onChange={dispatch(AppEvent.QueryChanged, "TBD")}></input>
         </p>
         <p>
           <button onClick={dispatch(AppEvent.SearchClicked, {})}>Search</button>
@@ -35,7 +35,7 @@ const App = ({ name = 'Noah\'s Reach' }) => {
   )
 }
 
-//-- Update ---------------------------------------------------------//
+//-- Update --//
 
 enum AppEvent {
   QueryChanged,
@@ -48,7 +48,7 @@ enum AppEffect {
 
 type AppChange = {
   model: AppModel,
-  effect: AppEffect,
+  effect: [AppEffect, any],
 }
 
 type AppEventHandler = (model: AppModel, arg: any) => AppChange
@@ -58,20 +58,21 @@ const eventHandlers: Record<AppEvent, AppEventHandler> = {
     return {
       model: {
         ...model,
-        query: arg.query
+        query: arg
       },
-      effect: AppEffect.NoOp,
+      effect: [AppEffect.NoOp, undefined],
     }
   },
-  [AppEvent.SearchClicked]: (model, _) => {
+  [AppEvent.SearchClicked]: (model, _arg) => {
     console.log(`TODO: Launch search with query: ${model.query}`)
-    return { model: model, effect: AppEffect.NoOp }
+    return {
+      model: model,
+      effect: [AppEffect.NoOp, undefined]
+    }
   },
 }
 
-//-- Runtime --------------------------------------------------------//
-
-const [model, setModel] = useState<AppModel>(initialModel)
+//-- Effects --//
 
 type AppEffectHandler = (effect: AppEffect, arg: any) => void
 
@@ -81,12 +82,17 @@ const effectHandlers: Record<AppEffect, AppEffectHandler> = {
   }
 }
 
+//-- Runtime --//
+
+const [model, setModel] = useState<AppModel>(initialModel)
+
 function dispatch(event: AppEvent, eventArg: any): undefined {
   const handleEvent = eventHandlers[event]
   const change = handleEvent(model, eventArg)
   setModel(change.model)
-  const handleEffect = effectHandlers[change.effect]
-  handleEffect(change.effect, {})
+  const [effect, effectArg] = change.effect
+  const handleEffect = effectHandlers[effect]
+  handleEffect(effect, effectArg)
 }
 
 declare global {
