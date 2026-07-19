@@ -27,23 +27,27 @@ function view(
     <h2>Hello, this is {model.name}!</h2>
     <fieldset>
       <legend>Find contacts</legend>
-      <label>Query</label>
-      <input type="text"
-        autoFocus
-        value={model.query}
-        onChange={
-          (event) => {
-            dispatch(AppEvent.QueryChanged, event.target.value)
-          }
-        }></input>
-      <button
-        onClick={
-          () => {
-            dispatch(AppEvent.SearchClicked, {})
-          }
-        }>
-        Search
-      </button>
+      <p>
+        <label>Query</label>
+        <input type="text"
+          autoFocus
+          value={model.query}
+          onChange={
+            (event) => {
+              dispatch(AppEvent.QueryChanged, event.target.value)
+            }
+          }></input>
+      </p>
+      <p>
+        <button
+          onClick={
+            () => {
+              dispatch(AppEvent.SearchClicked, {})
+            }
+          }>
+          Search
+        </button>
+      </p>
     </fieldset>
   </div>
 }
@@ -57,6 +61,11 @@ enum AppEvent {
 
 enum AppEffect {
   NoOp,
+  Log,
+}
+
+function noOp(): [AppEffect, any] {
+  return [AppEffect.NoOp, undefined]
 }
 
 type AppChange = {
@@ -73,25 +82,27 @@ const eventHandlers: Record<AppEvent, AppEventHandler> = {
         ...model,
         query: arg
       },
-      effect: [AppEffect.NoOp, undefined],
+      effect: noOp(),
     }
   },
   [AppEvent.SearchClicked]: (model, _arg) => {
-    console.log(`TODO: Launch search with query: ${model.query}`)
     return {
       model: model,
-      effect: [AppEffect.NoOp, undefined]
+      effect: [AppEffect.Log, `TODO: Launch search with query: ${model.query}`]
     }
   },
 }
 
 //-- Effects --//
 
-type AppEffectHandler = (effect: AppEffect, arg: any) => void
+type AppEffectHandler = (arg: any) => void
 
 const effectHandlers: Record<AppEffect, AppEffectHandler> = {
-  [AppEffect.NoOp]: (_effect, _arg) => {
+  [AppEffect.NoOp]: (_arg) => {
     // No op
+  },
+  [AppEffect.Log]: (arg) => {
+    console.log(`${arg}`)
   }
 }
 
@@ -109,7 +120,7 @@ const App = () => {
     }
     const [effect, effectArg] = change.effect
     const handleEffect = effectHandlers[effect]
-    handleEffect(effect, effectArg)
+    handleEffect(effectArg)
   }
 
   return view(model, dispatch)
