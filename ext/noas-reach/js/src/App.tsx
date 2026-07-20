@@ -19,8 +19,8 @@ const initialModel = {
 function view(
   model: AppModel,
   dispatch: (
-    eventEvent: AppEvent,
-    eventArgs: any,
+    event: AppEvent,
+    eventArg?: AppEventArg,
   ) => undefined,
 ) {
   return <div className="noas-reach">
@@ -42,7 +42,7 @@ function view(
         <button
           onClick={
             () => {
-              dispatch(AppEvent.SearchClicked, {})
+              dispatch(AppEvent.SearchClicked)
             }
           }>
           Search
@@ -59,22 +59,27 @@ enum AppEvent {
   SearchClicked,
 }
 
+type AppEventArg =
+  | undefined
+  | string
+
 const eventHandlers: Record<AppEvent, AppEventHandler> = {
-  [AppEvent.QueryChanged]: (model, arg) => {
+  [AppEvent.QueryChanged]: (model, arg): AppChange => {
     return {
       model: {
         ...model,
-        query: arg
+        query: arg as string
       },
       effect: noOp(),
     }
   },
-  [AppEvent.SearchClicked]: (model, _arg) => {
+  [AppEvent.SearchClicked]: (model, _arg): AppChange => {
     return {
       model: model,
       effect: [
         AppEffect.FetchContacts,
-        `TODO: Launch search with query: ${model.query}`]
+        model.query,
+      ]
     }
   },
 }
@@ -87,11 +92,16 @@ enum AppEffect {
   FetchContacts,
 }
 
-function noOp(): [AppEffect, any] {
+type AppEffectArg =
+  | undefined
+  | string
+  | { query: string }
+
+function noOp(): [AppEffect, AppEffectArg] {
   return [AppEffect.NoOp, undefined]
 }
 
-type AppEffectHandler = (arg: any) => void
+type AppEffectHandler = (arg: AppEffectArg) => void
 
 interface CiviContact {
   contact_type: string,
@@ -108,10 +118,13 @@ const effectHandlers: Record<AppEffect, AppEffectHandler> = {
     // No op
   },
   [AppEffect.Log]: (arg) => {
+    const logArg = arg as string
     const date = new Date().toISOString()
-    console.log(`[${date}] ${arg}`)
+    console.log(`[${date}] ${logArg}`)
   },
   [AppEffect.FetchContacts]: (arg) => {
+    const query = arg as string
+    console.log(`TODO: Launch search with query: ${query}`)
     window.CRM.api4('Contact', 'get', {
       limit: 25
     }).then((contacts: Array<CiviContact>) => {
@@ -131,10 +144,10 @@ const effectHandlers: Record<AppEffect, AppEffectHandler> = {
 
 type AppChange = {
   model: AppModel,
-  effect: [AppEffect, any],
+  effect: [AppEffect, AppEffectArg],
 }
 
-type AppEventHandler = (model: AppModel, arg: any) => AppChange
+type AppEventHandler = (model: AppModel, arg: AppEventArg) => AppChange
 
 const App = () => {
 
