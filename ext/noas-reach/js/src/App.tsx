@@ -72,7 +72,9 @@ const eventHandlers: Record<AppEvent, AppEventHandler> = {
   [AppEvent.SearchClicked]: (model, _arg) => {
     return {
       model: model,
-      effect: [AppEffect.Log, `TODO: Launch search with query: ${model.query}`]
+      effect: [
+        AppEffect.FetchContacts,
+        `TODO: Launch search with query: ${model.query}`]
     }
   },
 }
@@ -82,6 +84,7 @@ const eventHandlers: Record<AppEvent, AppEventHandler> = {
 enum AppEffect {
   NoOp,
   Log,
+  FetchContacts,
 }
 
 function noOp(): [AppEffect, any] {
@@ -97,6 +100,15 @@ const effectHandlers: Record<AppEffect, AppEffectHandler> = {
   [AppEffect.Log]: (arg) => {
     const date = new Date().toISOString()
     console.log(`[${date}] ${arg}`)
+  },
+  [AppEffect.FetchContacts]: (arg) => {
+    window.CRM.api4('Contact', 'get', {
+      limit: 25
+    }).then((contacts: any) => {
+      console.log(`Got contacts: ${contacts}`)
+    }, (failure: any) => {
+      console.log(`Got error: ${failure}`)
+    });
   }
 }
 
@@ -130,6 +142,7 @@ const App = () => {
 declare global {
   interface Window {
     initApp: (containerId: string) => void
+    CRM: any
   }
 }
 
