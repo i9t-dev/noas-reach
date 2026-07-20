@@ -93,6 +93,16 @@ function noOp(): [AppEffect, any] {
 
 type AppEffectHandler = (arg: any) => void
 
+interface CiviContact {
+  contact_type: string,
+  display_name: string,
+  first_name: string | undefined,
+  last_name: string | undefined,
+  organization_name: string | undefined,
+  created_date: Date,
+  modified_date: Date,
+}
+
 const effectHandlers: Record<AppEffect, AppEffectHandler> = {
   [AppEffect.NoOp]: (_arg) => {
     // No op
@@ -104,8 +114,13 @@ const effectHandlers: Record<AppEffect, AppEffectHandler> = {
   [AppEffect.FetchContacts]: (arg) => {
     window.CRM.api4('Contact', 'get', {
       limit: 25
-    }).then((contacts: any) => {
-      console.log(`Got contacts: ${contacts}`)
+    }).then((contacts: Array<CiviContact>) => {
+      console.log(
+        `Fetched contacts: ${contacts.map(
+          (c) => {
+            return `Contact(display_name: ${c.display_name}, contact_type: ${c.contact_type}, first_name: ${c.first_name}, last_name: ${c.last_name}, organization_name: ${c.organization_name}, created_date: ${c.created_date}, modified_date: ${c.modified_date})`
+          }
+        ).join(', ')}`)
     }, (failure: any) => {
       console.log(`Got error: ${failure}`)
     });
