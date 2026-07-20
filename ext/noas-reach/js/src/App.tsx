@@ -59,22 +59,6 @@ enum AppEvent {
   SearchClicked,
 }
 
-enum AppEffect {
-  NoOp,
-  Log,
-}
-
-function noOp(): [AppEffect, any] {
-  return [AppEffect.NoOp, undefined]
-}
-
-type AppChange = {
-  model: AppModel,
-  effect: [AppEffect, any],
-}
-
-type AppEventHandler = (model: AppModel, arg: any) => AppChange
-
 const eventHandlers: Record<AppEvent, AppEventHandler> = {
   [AppEvent.QueryChanged]: (model, arg) => {
     return {
@@ -95,6 +79,15 @@ const eventHandlers: Record<AppEvent, AppEventHandler> = {
 
 //-- Effects --//
 
+enum AppEffect {
+  NoOp,
+  Log,
+}
+
+function noOp(): [AppEffect, any] {
+  return [AppEffect.NoOp, undefined]
+}
+
 type AppEffectHandler = (arg: any) => void
 
 const effectHandlers: Record<AppEffect, AppEffectHandler> = {
@@ -107,6 +100,13 @@ const effectHandlers: Record<AppEffect, AppEffectHandler> = {
 }
 
 //-- Runtime --//
+
+type AppChange = {
+  model: AppModel,
+  effect: [AppEffect, any],
+}
+
+type AppEventHandler = (model: AppModel, arg: any) => AppChange
 
 const App = () => {
 
