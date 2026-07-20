@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react'
-import ReactDOM from 'react-dom/client'
+import React from 'react'
 import { useState } from 'react'
+import ReactDOM from 'react-dom/client'
 
 //-- Model --//
 
@@ -95,7 +95,8 @@ const effectHandlers: Record<AppEffect, AppEffectHandler> = {
     // No op
   },
   [AppEffect.Log]: (arg) => {
-    console.log(`${arg}`)
+    const date = new Date().toISOString()
+    console.log(`[${date}] ${arg}`)
   }
 }
 
