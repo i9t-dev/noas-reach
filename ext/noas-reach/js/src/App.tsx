@@ -7,21 +7,22 @@ import ReactDOM from 'react-dom/client'
 type AppModel = {
   name: string,
   query: string,
+  contacts: Array<CiviContact> | undefined
 }
 
-const initialModel = {
+const initialModel: AppModel = {
   name: "Noah's Reach",
   query: "",
+  contacts: undefined,
 }
 
 //-- View --//
 
+type Dispatch = (event: AppEvent, eventArg?: AppEventArg) => void
+
 function view(
   model: AppModel,
-  dispatch: (
-    event: AppEvent,
-    eventArg?: AppEventArg,
-  ) => undefined,
+  dispatch: Dispatch,
 ) {
   return <div className="noas-reach">
     <h2>Hello, this is {model.name}!</h2>
@@ -49,6 +50,18 @@ function view(
         </button>
       </p>
     </fieldset>
+    <fieldset>
+      <legend>Results</legend>
+      <ul>{
+        model.contacts
+          ? model.contacts.map(
+            (c, i) => (
+              <li key={i}>{c.display_name}</li>
+            )
+          )
+          : "No result"
+      }</ul>
+    </fieldset>
   </div>
 }
 
@@ -57,31 +70,68 @@ function view(
 enum AppEvent {
   QueryChanged,
   SearchClicked,
+  FetchingContacts,
+  FetchedContacts,
+  FetchContactsFailed,
 }
 
 type AppEventArg =
   | undefined
   | string
+  | Array<CiviContact>
+
+type AppChange = {
+  model: AppModel,
+  effect: [AppEffect, AppEffectArg?],
+}
+
+type AppEventHandler = (model: AppModel, arg?: AppEventArg) => AppChange
 
 const eventHandlers: Record<AppEvent, AppEventHandler> = {
-  [AppEvent.QueryChanged]: (model, arg): AppChange => {
+
+  [AppEvent.QueryChanged]: (model, arg) => {
+    const query = arg as string
     return {
       model: {
         ...model,
-        query: arg as string
+        query: query
       },
       effect: noOp(),
     }
   },
-  [AppEvent.SearchClicked]: (model, _arg): AppChange => {
+
+  [AppEvent.SearchClicked]: (model) => ({
+    model: model,
+    effect: [
+      AppEffect.FetchContacts,
+      model.query,
+    ]
+  }),
+
+  [AppEvent.FetchingContacts]: (model) => ({
+    model: model,
+    effect: [AppEffect.Log, `Fetching contacts for query: ${model.query}`],
+  }),
+
+  [AppEvent.FetchedContacts]: (model, arg) => {
+    const contacts = arg as Array<CiviContact>
     return {
-      model: model,
-      effect: [
-        AppEffect.FetchContacts,
-        model.query,
-      ]
+      model: {
+        ...model,
+        contacts: contacts,
+      },
+      effect: noOp()
     }
   },
+
+  [AppEvent.FetchContactsFailed]: (model, arg) => {
+    const failure = arg
+    return {
+      model: model,
+      effect: [AppEffect.Log, `Failed fetching contacts: ${failure}`]
+    }
+  },
+
 }
 
 //-- Effects --//
@@ -97,11 +147,11 @@ type AppEffectArg =
   | string
   | { query: string }
 
-function noOp(): [AppEffect, AppEffectArg] {
-  return [AppEffect.NoOp, undefined]
+function noOp(): [AppEffect, AppEffectArg?] {
+  return [AppEffect.NoOp]
 }
 
-type AppEffectHandler = (arg: AppEffectArg) => void
+type AppEffectHandler = (arg?: AppEffectArg, dispatch?: Dispatch) => void
 
 interface CiviContact {
   contact_type: string,
@@ -114,40 +164,36 @@ interface CiviContact {
 }
 
 const effectHandlers: Record<AppEffect, AppEffectHandler> = {
-  [AppEffect.NoOp]: (_arg) => {
+
+  [AppEffect.NoOp]: () => {
     // No op
   },
+
   [AppEffect.Log]: (arg) => {
     const logArg = arg as string
     const date = new Date().toISOString()
     console.log(`[${date}] ${logArg}`)
   },
-  [AppEffect.FetchContacts]: (arg) => {
+
+  [AppEffect.FetchContacts]: (arg, optionalDispatch) => {
     const query = arg as string
-    console.log(`TODO: Launch search with query: ${query}`)
-    window.CRM.api4('Contact', 'get', {
-      limit: 25
-    }).then((contacts: Array<CiviContact>) => {
-      console.log(
-        `Fetched contacts: ${contacts.map(
-          (c) => {
-            return `Contact(display_name: ${c.display_name}, contact_type: ${c.contact_type}, first_name: ${c.first_name}, last_name: ${c.last_name}, organization_name: ${c.organization_name}, created_date: ${c.created_date}, modified_date: ${c.modified_date})`
-          }
-        ).join(', ')}`)
-    }, (failure: any) => {
-      console.log(`Got error: ${failure}`)
-    });
-  }
+    const dispatch = optionalDispatch as Dispatch
+    dispatch(AppEvent.FetchingContacts)
+    console.log(`TODO: Fetch according to query: ${query}`)
+    window.CRM
+      .api4('Contact', 'get', { limit: 25 })
+      .then(
+        (contacts: Array<CiviContact>) => {
+          dispatch(AppEvent.FetchedContacts, contacts)
+        },
+        (failure: any) => {
+          dispatch(AppEvent.FetchContactsFailed, failure)
+        })
+  },
+
 }
 
 //-- Runtime --//
-
-type AppChange = {
-  model: AppModel,
-  effect: [AppEffect, AppEffectArg],
-}
-
-type AppEventHandler = (model: AppModel, arg: AppEventArg) => AppChange
 
 const App = () => {
 
@@ -161,7 +207,7 @@ const App = () => {
     }
     const [effect, effectArg] = change.effect
     const handleEffect = effectHandlers[effect]
-    handleEffect(effectArg)
+    handleEffect(effectArg, dispatch)
   }
 
   return view(model, dispatch)
