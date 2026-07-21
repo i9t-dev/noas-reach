@@ -27,72 +27,82 @@ export namespace Core {
   type Dispatch = (event: Message) => void
 
   export function view(model: Model, dispatch: Dispatch) {
+
     return <div className="noas-reach">
-      <h2>Hello, this is {model.name}!</h2>
-      <fieldset>
-        <legend>Find contacts</legend>
-        <p>
-          <label>Query</label>
-          <input type="text"
-            autoFocus
-            value={model.query}
-            onChange={(event) => {
-              dispatch({ type: 'QueryChanged', query: event.target.value })
-            }}></input>
-        </p>
-        <p>
-          <button
-            onClick={() => {
-              dispatch({ type: 'SearchClicked' })
-            }}>
-            Search
-          </button>
-        </p>
-      </fieldset>
-      <fieldset>
-        <legend>Results</legend>
-        <table>
-          <thead>
-            <tr>
-              <th>Display name</th>
-              <th>First name</th>
-              <th>Last name</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {(model.contacts &&
-              model?.contacts?.length != 0)
-              ? model.contacts.map(
-                (c, i) => (
-                  <tr key={i}>
-                    <td>{c.displayName}</td>
-                    <td>{c.firstName || 'N/A'}</td>
-                    <td>{c.lastName || 'N/A'}</td>
-                    <td>
-                      <button
-                        onClick={
-                          () => (dispatch(
-                            { type: 'DetailClicked', contact: c }
-                          ))
-                        }>
-                        Detail
-                      </button>
-                    </td>
-                  </tr>
-                )
-              )
-              : <tr>
-                <td colSpan={4}>
-                  <div style={{ textAlign: "center" }}>
-                    No result
-                  </div>
-                </td>
-              </tr>}
-          </tbody>
-        </table>
-      </fieldset>
+      {viewForm()}
+      {viewResults()}
     </div>
+
+    function viewForm() {
+      return (
+        <fieldset>
+          <legend>Find contacts</legend>
+          <p>
+            <label>Query</label>
+            <input type="text"
+              autoFocus
+              value={model.query}
+              onChange={(event) => {
+                dispatch({ type: 'QueryChanged', query: event.target.value })
+              }}></input>
+          </p>
+          <p>
+            <button
+              onClick={() => {
+                dispatch({ type: 'SearchClicked' })
+              }}>
+              Search
+            </button>
+          </p>
+        </fieldset>)
+    }
+    function viewResults() {
+      return (
+        <fieldset>
+          <legend>Results</legend>
+          <table>
+            <thead>
+              <tr>
+                <th>Display name</th>
+                <th>First name</th>
+                <th>Last name</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(model.contacts &&
+                model?.contacts?.length != 0)
+                ? model.contacts.map(
+                  (c, i) => (
+                    <tr key={i}>
+                      <td>{c.displayName}</td>
+                      <td>{c.firstName || 'N/A'}</td>
+                      <td>{c.lastName || 'N/A'}</td>
+                      <td>
+                        <button
+                          onClick={
+                            () => (dispatch(
+                              { type: 'DetailClicked', contact: c }
+                            ))
+                          }>
+                          Detail
+                        </button>
+                      </td>
+                    </tr>
+                  )
+                )
+                : <tr>
+                  <td colSpan={4}>
+                    <div style={{ textAlign: "center" }}>
+                      No result
+                    </div>
+                  </td>
+                </tr>}
+            </tbody>
+          </table>
+        </fieldset>
+      )
+    }
   }
 
   //-- Update --//
@@ -225,7 +235,7 @@ export namespace Core {
     log: (message: string) => void
   }
 
-  export const makeHandleEffect = (context: Context) =>
+  export const makeEffectHandler = (context: Context) =>
 
     (effect: Effect, dispatch: Dispatch) => {
 

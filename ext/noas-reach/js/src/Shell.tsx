@@ -21,7 +21,7 @@ const Shell = () => {
     if (model != change.model) {
       setModel(change.model)
     }
-    const handleEffect = Core.makeHandleEffect(window)
+    const handleEffect = Core.makeEffectHandler(window)
     handleEffect(change.effect, dispatch)
   }
 
