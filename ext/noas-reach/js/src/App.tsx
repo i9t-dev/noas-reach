@@ -156,7 +156,7 @@ interface CiviContact {
   modified_date: Date,
 }
 
-function handleEffect(effect: AppEffect, dispatch: Dispatch): void {
+function handleEffect(effect: AppEffect, dispatch: Dispatch) {
   switch (effect.type) {
     case 'NoOp': /* No op */ break
     case 'FetchContacts': return fetchContacts(effect.query, dispatch)
@@ -175,7 +175,7 @@ function fetchContacts(query: string, dispatch: Dispatch) {
   window.CRM
     .api4('Contact', 'get', { limit: 25 })
     .then(
-      (contacts: Array<CiviContact>) => {
+      (contacts: CiviContact[]) => {
         dispatch({ type: 'FetchedContacts', contacts: contacts })
       },
       (failure: Error) => {
@@ -189,7 +189,7 @@ const App = () => {
 
   const [model, setModel] = useState<AppModel>(initialModel)
 
-  function dispatch(message: AppMessage): undefined {
+  function dispatch(message: AppMessage) {
     const change = update(model, message)
     if (model != change.model) {
       setModel(change.model)
