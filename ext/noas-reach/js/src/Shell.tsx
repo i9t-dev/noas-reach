@@ -8,6 +8,7 @@ import { Core } from './Core'
 declare global {
   interface Window extends Core.Context {
     initApp: (containerId: string) => void
+    CRM: any
   }
 }
 
@@ -26,6 +27,9 @@ const Shell = () => {
 
   return Core.view(model, dispatch)
 }
+
+window.log = console.log
+window.api = window.CRM.api4
 
 // CiviCRM will call this when the script loads
 window.initApp = (containerId: string) => {

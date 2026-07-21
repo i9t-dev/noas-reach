@@ -180,13 +180,12 @@ export namespace Core {
   }
 
   export type Context = {
-    CRM: {
-      api4: (
-        endpoint: string,
-        method: string,
-        options: { limit: number }
-      ) => Promise<CiviContact[]>
-    }
+    api: (
+      endpoint: string,
+      method: string,
+      options: { limit: number }
+    ) => Promise<CiviContact[]>
+    log: (message: string) => void
   }
 
   export const makeHandleEffect = (context: Context) =>
@@ -195,20 +194,20 @@ export namespace Core {
         case 'NoOp': /* No op */ break
         case 'FetchContacts':
           return fetchContacts(context, effect.query, dispatch)
-        case 'Log': return log(effect.message)
+        case 'Log': return logMessage(context, effect.message)
       }
     }
 
-  function log(message: string) {
+  function logMessage(context: Context, message: string) {
     const date = new Date().toISOString()
-    console.log(`[${date}] ${message}`)
+    context.log(`[${date}] ${message}`)
   }
 
   function fetchContacts(context: Context, query: string, dispatch: Dispatch) {
     dispatch({ type: 'FetchContactsStarted' })
-    console.log(`TODO: Fetch according to query: ${query}`)
-    context.CRM
-      .api4('Contact', 'get', { limit: 25 })
+    context.log(`TODO: Fetch according to query: ${query}`)
+    context
+      .api('Contact', 'get', { limit: 25 })
       .then(
         (contacts: CiviContact[]) => {
           dispatch({ type: 'FetchedContacts', contacts: contacts })
