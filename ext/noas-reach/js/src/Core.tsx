@@ -110,6 +110,7 @@ export namespace Core {
   }
 
   export function update(model: Model, message: Message): Change {
+
     switch (message.type) {
       case 'QueryChanged': return saveQuery(model, message.query)
       case 'SearchClicked': return startFetch(model)
@@ -119,68 +120,68 @@ export namespace Core {
       case 'DetailClicked': return openDetail(model, message.contact)
       default: return { model: model, effect: { type: 'NoOp' } }
     }
-  }
 
-  function saveQuery(model: Model, query: string): Change {
-    return {
-      model: {
-        ...model,
-        query: query
-      },
-      effect: { type: 'NoOp' },
+    function saveQuery(model: Model, query: string): Change {
+      return {
+        model: {
+          ...model,
+          query: query
+        },
+        effect: { type: 'NoOp' },
+      }
     }
-  }
 
-  function indicateFetching(model: Model): Change {
-    return {
-      model: model,
-      effect: {
-        type: 'Log',
-        message: `Fetching contacts matching query: ${model.query}`,
-      },
+    function indicateFetching(model: Model): Change {
+      return {
+        model: model,
+        effect: {
+          type: 'Log',
+          message: `Fetching contacts matching query: ${model.query}`,
+        },
+      }
     }
-  }
 
-  function startFetch(model: Model): Change {
-    return {
-      model: model,
-      effect: { type: 'FetchContacts', query: model.query },
+    function startFetch(model: Model): Change {
+      return {
+        model: model,
+        effect: { type: 'FetchContacts', query: model.query },
+      }
     }
-  }
 
-  function importFetched(
-    model: Model,
-    civiContacts: CiviContact[] | undefined,
-  ): Change {
-    return {
-      model: {
-        ...model,
-        contacts: civiContacts?.map(
-          (civiContact) => {
-            return {
-              displayName: civiContact.display_name,
-              firstName: civiContact.first_name,
-              lastName: civiContact.last_name,
-            }
-          }),
-      },
-      effect: { type: 'NoOp' },
+    function importFetched(
+      model: Model,
+      civiContacts: CiviContact[] | undefined,
+    ): Change {
+      return {
+        model: {
+          ...model,
+          contacts: civiContacts?.map(
+            (civiContact) => {
+              return {
+                displayName: civiContact.display_name,
+                firstName: civiContact.first_name,
+                lastName: civiContact.last_name,
+              }
+            }),
+        },
+        effect: { type: 'NoOp' },
+      }
     }
-  }
 
-  function indicateFailure(model: Model, failure: Error): Change {
-    return {
-      model: model,
-      effect: { type: 'Log', message: `Failed fetching contacts: ${failure}` },
+    function indicateFailure(model: Model, failure: Error): Change {
+      return {
+        model: model,
+        effect: { type: 'Log', message: `Failed fetching contacts: ${failure}` },
+      }
     }
-  }
 
-  function openDetail(model: Model, contact: Contact): Change {
-    return {
-      model: model,
-      effect: {
-        type: 'Log',
-        message: `TODO: Open detail for contact: ${contact.displayName}`,
+    function openDetail(model: Model, contact: Contact): Change {
+      return {
+        model: model,
+        effect: {
+          type: 'Log',
+          message: `TODO: Open detail for contact: ${contact.displayName}`,
+        }
       }
     }
   }
@@ -212,32 +213,33 @@ export namespace Core {
   }
 
   export const makeHandleEffect = (context: Context) =>
+
     (effect: Effect, dispatch: Dispatch) => {
+
       switch (effect.type) {
         case 'NoOp': /* No op */ break
-        case 'FetchContacts':
-          return fetchContacts(context, effect.query, dispatch)
-        case 'Log': return logMessage(context, effect.message)
+        case 'FetchContacts': return fetchContacts(effect.query, dispatch)
+        case 'Log': return logMessage(effect.message)
+      }
+
+      function logMessage(message: string) {
+        const date = new Date().toISOString()
+        context.log(`[${date}] ${message}`)
+      }
+
+      function fetchContacts(query: string, dispatch: Dispatch) {
+        dispatch({ type: 'FetchContactsStarted' })
+        context.log(`TODO: Fetch according to query: ${query}`)
+        context
+          .api('Contact', 'get', { limit: 25 })
+          .then(
+            (contacts: CiviContact[]) => {
+              dispatch({ type: 'FetchedContacts', contacts: contacts })
+            },
+            (failure: Error) => {
+              dispatch({ type: 'FetchContactsFailed', failure: failure })
+            },
+          )
       }
     }
-
-  function logMessage(context: Context, message: string) {
-    const date = new Date().toISOString()
-    context.log(`[${date}] ${message}`)
-  }
-
-  function fetchContacts(context: Context, query: string, dispatch: Dispatch) {
-    dispatch({ type: 'FetchContactsStarted' })
-    context.log(`TODO: Fetch according to query: ${query}`)
-    context
-      .api('Contact', 'get', { limit: 25 })
-      .then(
-        (contacts: CiviContact[]) => {
-          dispatch({ type: 'FetchedContacts', contacts: contacts })
-        },
-        (failure: Error) => {
-          dispatch({ type: 'FetchContactsFailed', failure: failure })
-        },
-      )
-  }
 }
