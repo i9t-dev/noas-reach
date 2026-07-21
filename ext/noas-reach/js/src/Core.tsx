@@ -57,6 +57,7 @@ export namespace Core {
               <th>Display name</th>
               <th>First name</th>
               <th>Last name</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -65,13 +66,23 @@ export namespace Core {
                 (c, i) => (
                   <tr key={i}>
                     <td>{c.displayName}</td>
-                    <td>{c.firstName}</td>
-                    <td>{c.lastName}</td>
+                    <td>{c.firstName || 'N/A'}</td>
+                    <td>{c.lastName || 'N/A'}</td>
+                    <td>
+                      <button
+                        onClick={
+                          () => (dispatch(
+                            { type: 'DetailClicked', contact: c }
+                          ))
+                        }>
+                        Detail
+                      </button>
+                    </td>
                   </tr>
                 )
               )
               : <tr>
-                <td colSpan={3}>
+                <td colSpan={4}>
                   <div style={{ textAlign: "center" }}>
                     No result
                   </div>
@@ -91,6 +102,7 @@ export namespace Core {
     | { type: 'FetchContactsStarted' }
     | { type: 'FetchedContacts', contacts: CiviContact[] | undefined }
     | { type: 'FetchContactsFailed', failure: Error }
+    | { type: 'DetailClicked', contact: Contact }
 
   export type Change = {
     model: Model
@@ -104,6 +116,7 @@ export namespace Core {
       case 'FetchContactsStarted': return indicateFetching(model)
       case 'FetchedContacts': return importFetched(model, message.contacts)
       case 'FetchContactsFailed': return indicateFailure(model, message.failure)
+      case 'DetailClicked': return openDetail(model, message.contact)
       default: return { model: model, effect: { type: 'NoOp' } }
     }
   }
@@ -159,6 +172,16 @@ export namespace Core {
     return {
       model: model,
       effect: { type: 'Log', message: `Failed fetching contacts: ${failure}` },
+    }
+  }
+
+  function openDetail(model: Model, contact: Contact): Change {
+    return {
+      model: model,
+      effect: {
+        type: 'Log',
+        message: `TODO: Open detail for contact: ${contact.displayName}`,
+      }
     }
   }
 
