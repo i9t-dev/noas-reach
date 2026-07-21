@@ -3,7 +3,7 @@
   <item>
     <path>civicrm/app</path>
     <page_callback>CRM_NoasReach_Page_App</page_callback>
-    <title>App</title>
+    <title>Noah's Reach</title>
     <access_arguments>access CiviCRM</access_arguments>
   </item>
 </menu>
