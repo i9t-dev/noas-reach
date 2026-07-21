@@ -7,7 +7,7 @@ import ReactDOM from 'react-dom/client'
 type AppModel = {
   name: string,
   query: string,
-  contacts: Array<CiviContact> | undefined
+  contacts: CiviContact[] | undefined
 }
 
 const initialModel: AppModel = {
@@ -20,10 +20,7 @@ const initialModel: AppModel = {
 
 type Dispatch = (event: AppMessage) => void
 
-function view(
-  model: AppModel,
-  dispatch: Dispatch,
-) {
+function view(model: AppModel, dispatch: Dispatch) {
   return <div className="noas-reach">
     <h2>Hello, this is {model.name}!</h2>
     <fieldset>
