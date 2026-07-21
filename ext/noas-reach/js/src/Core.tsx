@@ -73,7 +73,7 @@ export namespace Core {
   export function update(model: Model, message: Message): Change {
     switch (message.type) {
       case 'QueryChanged': return saveQuery(model, message.query)
-      case 'SearchClicked': return startFetchContacts(model)
+      case 'SearchClicked': return startFetch(model)
       case 'FetchContactsStarted': return indicateFetching(model)
       case 'FetchedContacts': return saveFetched(model, message.contacts)
       case 'FetchContactsFailed': return indicateFailure(model, message.failure)
@@ -101,7 +101,7 @@ export namespace Core {
     }
   }
 
-  function startFetchContacts(model: Model): Change {
+  function startFetch(model: Model): Change {
     return {
       model: model,
       effect: { type: 'FetchContacts', query: model.query },
@@ -127,7 +127,8 @@ export namespace Core {
 
   //-- Effects --//
 
-  export type Effect = { type: 'NoOp' }
+  export type Effect =
+    | { type: 'NoOp' }
     | { type: 'Log', message: string }
     | { type: 'FetchContacts', query: string }
 
