@@ -61,7 +61,8 @@ export namespace Core {
             </tr>
           </thead>
           <tbody>
-            {model.contacts
+            {(model.contacts &&
+              model?.contacts?.length != 0)
               ? model.contacts.map(
                 (c, i) => (
                   <tr key={i}>
@@ -142,9 +143,13 @@ export namespace Core {
     }
 
     function startFetch(model: Model): Change {
+      const effect: Effect =
+        model.query
+          ? { type: 'FetchContacts', query: model.query }
+          : { type: 'ClearResults' }
       return {
         model: model,
-        effect: { type: 'FetchContacts', query: model.query },
+        effect: effect,
       }
     }
 
@@ -192,6 +197,7 @@ export namespace Core {
     | { type: 'NoOp' }
     | { type: 'Log', message: string }
     | { type: 'FetchContacts', query: string }
+    | { type: 'ClearResults' }
 
   interface CiviContact {
     contact_type: string
@@ -207,7 +213,14 @@ export namespace Core {
     api: (
       endpoint: string,
       method: string,
-      options: { limit: number }
+      options: {
+        limit: number,
+        where: [[
+          fieldName: string,
+          operator: string,
+          fieldValue: string
+        ]]
+      }
     ) => Promise<CiviContact[]>
     log: (message: string) => void
   }
@@ -220,6 +233,7 @@ export namespace Core {
         case 'NoOp': /* No op */ break
         case 'FetchContacts': return fetchContacts(effect.query, dispatch)
         case 'Log': return logMessage(effect.message)
+        case 'ClearResults': return clearResults()
       }
 
       function logMessage(message: string) {
@@ -229,9 +243,12 @@ export namespace Core {
 
       function fetchContacts(query: string, dispatch: Dispatch) {
         dispatch({ type: 'FetchContactsStarted' })
-        context.log(`TODO: Fetch according to query: ${query}`)
         context
-          .api('Contact', 'get', { limit: 25 })
+          .api(
+            'Contact',
+            'get',
+            { limit: 25, where: [["display_name", "CONTAINS", query]], }
+          )
           .then(
             (contacts: CiviContact[]) => {
               dispatch({ type: 'FetchedContacts', contacts: contacts })
@@ -240,6 +257,10 @@ export namespace Core {
               dispatch({ type: 'FetchContactsFailed', failure: failure })
             },
           )
+      }
+
+      function clearResults() {
+        dispatch({ type: 'FetchedContacts', contacts: [] })
       }
     }
 }
