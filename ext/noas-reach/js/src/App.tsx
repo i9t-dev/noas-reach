@@ -67,7 +67,7 @@ function view(model: AppModel, dispatch: Dispatch) {
 type AppMessage =
   | { type: 'QueryChanged', query: string }
   | { type: 'SearchClicked' }
-  | { type: 'FetchingContacts' }
+  | { type: 'FetchContactsStarted' }
   | { type: 'FetchedContacts', contacts: CiviContact[] | undefined }
   | { type: 'FetchContactsFailed', failure: Error }
 
@@ -79,8 +79,8 @@ type AppChange = {
 function update(model: AppModel, message: AppMessage): AppChange {
   switch (message.type) {
     case 'QueryChanged': return saveQuery(model, message.query)
-    case 'SearchClicked': return fetchContacts(model)
-    case 'FetchingContacts': return indicateFetching(model)
+    case 'SearchClicked': return startFetchContacts(model)
+    case 'FetchContactsStarted': return indicateFetching(model)
     case 'FetchedContacts': return saveFetchedContacts(model, message.contacts)
     case 'FetchContactsFailed': return indicateFailure(model, message.failure)
     default: return { model: model, effect: { type: 'NoOp' } }
@@ -107,7 +107,7 @@ function indicateFetching(model: AppModel): AppChange {
   }
 }
 
-function fetchContacts(model: AppModel): AppChange {
+function startFetchContacts(model: AppModel): AppChange {
   return {
     model: model,
     effect: { type: 'FetchContacts', query: model.query },
@@ -162,7 +162,7 @@ function log(message: string) {
 }
 
 function fetchContacts(query: string, dispatch: Dispatch) {
-  dispatch({ type: 'FetchingContacts' })
+  dispatch({ type: 'FetchContactsStarted' })
   console.log(`TODO: Fetch according to query: ${query}`)
   window.CRM
     .api4('Contact', 'get', { limit: 25 })
