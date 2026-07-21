@@ -108,7 +108,10 @@ function handleSaveQuery(model: AppModel, query: string): AppChange {
 function handleFetchingContacts(model: AppModel): AppChange {
   return {
     model: model,
-    effect: { type: 'FetchContacts', query: model.query },
+    effect: {
+      type: 'Log',
+      message: `Fetching contacts matching query: ${model.query}`,
+    },
   }
 }
 
