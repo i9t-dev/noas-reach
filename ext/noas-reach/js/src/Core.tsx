@@ -7,7 +7,13 @@ export namespace Core {
   export type Model = {
     name: string
     query: string
-    contacts: CiviContact[] | undefined
+    contacts: Contact[] | undefined
+  }
+
+  type Contact = {
+    displayName: string,
+    firstName: string | undefined,
+    lastName: string | undefined,
   }
 
   export const initialModel: Model = {
@@ -45,13 +51,34 @@ export namespace Core {
       </fieldset>
       <fieldset>
         <legend>Results</legend>
-        <ul>{model.contacts
-          ? model.contacts.map(
-            (c, i) => (
-              <li key={i}>{c.display_name}</li>
-            )
-          )
-          : "No result"}</ul>
+        <table>
+          <thead>
+            <tr>
+              <th>Display name</th>
+              <th>First name</th>
+              <th>Last name</th>
+            </tr>
+          </thead>
+          <tbody>
+            {model.contacts
+              ? model.contacts.map(
+                (c, i) => (
+                  <tr key={i}>
+                    <td>{c.displayName}</td>
+                    <td>{c.firstName}</td>
+                    <td>{c.lastName}</td>
+                  </tr>
+                )
+              )
+              : <tr>
+                <td colSpan={3}>
+                  <div style={{ textAlign: "center" }}>
+                    No result
+                  </div>
+                </td>
+              </tr>}
+          </tbody>
+        </table>
       </fieldset>
     </div>
   }
@@ -75,7 +102,7 @@ export namespace Core {
       case 'QueryChanged': return saveQuery(model, message.query)
       case 'SearchClicked': return startFetch(model)
       case 'FetchContactsStarted': return indicateFetching(model)
-      case 'FetchedContacts': return saveFetched(model, message.contacts)
+      case 'FetchedContacts': return importFetched(model, message.contacts)
       case 'FetchContactsFailed': return indicateFailure(model, message.failure)
       default: return { model: model, effect: { type: 'NoOp' } }
     }
@@ -108,11 +135,21 @@ export namespace Core {
     }
   }
 
-  function saveFetched(model: Model, contacts: CiviContact[] | undefined): Change {
+  function importFetched(
+    model: Model,
+    civiContacts: CiviContact[] | undefined,
+  ): Change {
     return {
       model: {
         ...model,
-        contacts: contacts,
+        contacts: civiContacts?.map(
+          (civiContact) => {
+            return {
+              displayName: civiContact.display_name,
+              firstName: civiContact.first_name,
+              lastName: civiContact.last_name,
+            }
+          }),
       },
       effect: { type: 'NoOp' },
     }
