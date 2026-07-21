@@ -1,24 +1,30 @@
 import React from 'react'
 import { useState } from 'react'
 import ReactDOM from 'react-dom/client'
-import { App } from './App'
+import { Core } from './Core'
 
 //-- Runtime --//
 
+declare global {
+  interface Window extends Core.Context {
+    initApp: (containerId: string) => void
+  }
+}
+
 const Shell = () => {
 
-  const [model, setModel] = useState<App.Model>(App.initialModel)
+  const [model, setModel] = useState<Core.Model>(Core.initialModel)
 
-  function dispatch(message: App.Message) {
-    const change = App.update(model, message)
+  function dispatch(message: Core.Message) {
+    const change = Core.update(model, message)
     if (model != change.model) {
       setModel(change.model)
     }
-    const handleEffect = App.makeHandleEffect(window)
+    const handleEffect = Core.makeHandleEffect(window)
     handleEffect(change.effect, dispatch)
   }
 
-  return App.view(model, dispatch)
+  return Core.view(model, dispatch)
 }
 
 // CiviCRM will call this when the script loads
@@ -29,3 +35,4 @@ window.initApp = (containerId: string) => {
     root.render(<Shell />)
   }
 }
+

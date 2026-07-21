@@ -1,7 +1,6 @@
 import React from 'react'
-import { Context } from './Context'
 
-export namespace App {
+export namespace Core {
 
   //-- Model --//
 
@@ -17,9 +16,9 @@ export namespace App {
     contacts: undefined,
   }
 
-  type Dispatch = (event: Message) => void
-
   //-- View --//
+
+  type Dispatch = (event: Message) => void
 
   export function view(model: Model, dispatch: Dispatch) {
     return <div className="noas-reach">
@@ -127,6 +126,7 @@ export namespace App {
   }
 
   //-- Effects --//
+
   export type Effect = { type: 'NoOp' }
     | { type: 'Log', message: string }
     | { type: 'FetchContacts', query: string }
@@ -139,6 +139,16 @@ export namespace App {
     organization_name: string | undefined
     created_date: Date
     modified_date: Date
+  }
+
+  export type Context = {
+    CRM: {
+      api4: (
+        endpoint: string,
+        method: string,
+        options: { limit: number }
+      ) => Promise<CiviContact[]>
+    }
   }
 
   export const makeHandleEffect = (context: Context) =>
