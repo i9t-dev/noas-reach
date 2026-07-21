@@ -18,7 +18,7 @@ const initialModel: AppModel = {
 
 //-- View --//
 
-type Dispatch = (event: AppEvent, eventArg?: AppEventArg) => void
+type Dispatch = (event: AppMessage) => void
 
 function view(
   model: AppModel,
@@ -35,7 +35,7 @@ function view(
           value={model.query}
           onChange={
             (event) => {
-              dispatch(AppEvent.QueryChanged, event.target.value)
+              dispatch({ type: 'QueryChanged', query: event.target.value })
             }
           }></input>
       </p>
@@ -43,7 +43,7 @@ function view(
         <button
           onClick={
             () => {
-              dispatch(AppEvent.SearchClicked)
+              dispatch({ type: 'SearchClicked' })
             }
           }>
           Search
@@ -67,71 +67,66 @@ function view(
 
 //-- Update --//
 
-enum AppEvent {
-  QueryChanged,
-  SearchClicked,
-  FetchingContacts,
-  FetchedContacts,
-  FetchContactsFailed,
-}
-
-type AppEventArg =
-  | undefined
-  | string
-  | Array<CiviContact>
+type AppMessage =
+  | { type: 'QueryChanged', query: string }
+  | { type: 'SearchClicked' }
+  | { type: 'FetchingContacts' }
+  | { type: 'FetchedContacts', contacts: CiviContact[] | undefined }
+  | { type: 'FetchContactsFailed', failure: Error }
 
 type AppChange = {
   model: AppModel,
   effect: [AppEffect, AppEffectArg?],
 }
 
-type AppEventHandler = (model: AppModel, arg?: AppEventArg) => AppChange
-
-const eventHandlers: Record<AppEvent, AppEventHandler> = {
-
-  [AppEvent.QueryChanged]: (model, arg) => {
-    const query = arg as string
-    return {
-      model: {
-        ...model,
-        query: query
-      },
+function update(model: AppModel, message: AppMessage): AppChange {
+  switch (message.type) {
+    case 'QueryChanged': return handleSaveQuery(model, message.query)
+    case 'SearchClicked': return handleFetchContacts(model)
+    case 'FetchingContacts': return handleFetchingContacts(model)
+    case 'FetchedContacts':
+      return handleFetchedContacts(model, message.contacts)
+    case 'FetchContactsFailed':
+      return handleFetchContactsFailed(model, message.failure)
+    default: return {
+      model: model,
       effect: noOp(),
     }
-  },
+  }
+}
 
-  [AppEvent.SearchClicked]: (model) => ({
-    model: model,
-    effect: [
-      AppEffect.FetchContacts,
-      model.query,
-    ]
-  }),
+function handleSaveQuery(model: AppModel, query: string,): AppChange {
+  return {
+    model: {
+      ...model,
+      query: query
+    },
+    effect: noOp(),
+  }
+}
 
-  [AppEvent.FetchingContacts]: (model) => ({
+function handleFetchingContacts(model: AppModel): AppChange {
+  return {
     model: model,
     effect: [AppEffect.Log, `Fetching contacts for query: ${model.query}`],
-  }),
+  }
+}
 
-  [AppEvent.FetchedContacts]: (model, arg) => {
-    const contacts = arg as Array<CiviContact>
-    return {
-      model: {
-        ...model,
-        contacts: contacts,
-      },
-      effect: noOp()
-    }
-  },
+function handleFetchedContacts(model: AppModel, contacts: CiviContact[] | undefined): AppChange {
+  return {
+    model: {
+      ...model,
+      contacts: contacts,
+    },
+    effect: noOp()
+  }
+}
 
-  [AppEvent.FetchContactsFailed]: (model, arg) => {
-    const failure = arg
-    return {
-      model: model,
-      effect: [AppEffect.Log, `Failed fetching contacts: ${failure}`]
-    }
-  },
-
+function handleFetchContactsFailed(model: AppModel, failure: Error): AppChange {
+  return {
+    model: model,
+    effect: [AppEffect.Log, `Failed fetching contacts: ${failure}`]
+  }
 }
 
 //-- Effects --//
@@ -178,16 +173,16 @@ const effectHandlers: Record<AppEffect, AppEffectHandler> = {
   [AppEffect.FetchContacts]: (arg, optionalDispatch) => {
     const query = arg as string
     const dispatch = optionalDispatch as Dispatch
-    dispatch(AppEvent.FetchingContacts)
+    dispatch({ type: 'FetchingContacts' })
     console.log(`TODO: Fetch according to query: ${query}`)
     window.CRM
       .api4('Contact', 'get', { limit: 25 })
       .then(
         (contacts: Array<CiviContact>) => {
-          dispatch(AppEvent.FetchedContacts, contacts)
+          dispatch({ type: 'FetchedContacts', contacts: contacts })
         },
-        (failure: any) => {
-          dispatch(AppEvent.FetchContactsFailed, failure)
+        (failure: Error) => {
+          dispatch({ type: 'FetchContactsFailed', failure: failure })
         })
   },
 
@@ -199,9 +194,8 @@ const App = () => {
 
   const [model, setModel] = useState<AppModel>(initialModel)
 
-  function dispatch(event: AppEvent, eventArg: any): undefined {
-    const handleEvent = eventHandlers[event]
-    const change = handleEvent(model, eventArg)
+  function dispatch(message: AppMessage): undefined {
+    const change = update(model, message)
     if (model != change.model) {
       setModel(change.model)
     }
@@ -226,5 +220,15 @@ window.initApp = (containerId: string) => {
   if (container) {
     const root = ReactDOM.createRoot(container)
     root.render(<App />)
+  }
+}
+
+function handleFetchContacts(model: AppModel): AppChange {
+  return {
+    model: model,
+    effect: [
+      AppEffect.FetchContacts,
+      model.query,
+    ]
   }
 }
