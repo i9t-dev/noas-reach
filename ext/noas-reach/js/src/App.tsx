@@ -76,7 +76,7 @@ type AppMessage =
 
 type AppChange = {
   model: AppModel,
-  effect: [AppEffect, AppEffectArg?],
+  effect: AppEffect,
 }
 
 function update(model: AppModel, message: AppMessage): AppChange {
@@ -90,25 +90,32 @@ function update(model: AppModel, message: AppMessage): AppChange {
       return handleFetchContactsFailed(model, message.failure)
     default: return {
       model: model,
-      effect: noOp(),
+      effect: { type: 'NoOp' },
     }
   }
 }
 
-function handleSaveQuery(model: AppModel, query: string,): AppChange {
+function handleSaveQuery(model: AppModel, query: string): AppChange {
   return {
     model: {
       ...model,
       query: query
     },
-    effect: noOp(),
+    effect: { type: 'NoOp' },
   }
 }
 
 function handleFetchingContacts(model: AppModel): AppChange {
   return {
     model: model,
-    effect: [AppEffect.Log, `Fetching contacts for query: ${model.query}`],
+    effect: { type: 'FetchContacts', query: model.query },
+  }
+}
+
+function handleFetchContacts(model: AppModel): AppChange {
+  return {
+    model: model,
+    effect: { type: 'FetchContacts', query: model.query },
   }
 }
 
@@ -118,35 +125,23 @@ function handleFetchedContacts(model: AppModel, contacts: CiviContact[] | undefi
       ...model,
       contacts: contacts,
     },
-    effect: noOp()
+    effect: { type: 'NoOp' },
   }
 }
 
 function handleFetchContactsFailed(model: AppModel, failure: Error): AppChange {
   return {
     model: model,
-    effect: [AppEffect.Log, `Failed fetching contacts: ${failure}`]
+    effect: { type: 'Log', message: `Failed fetching contacts: ${failure}` },
   }
 }
 
 //-- Effects --//
 
-enum AppEffect {
-  NoOp,
-  Log,
-  FetchContacts,
-}
-
-type AppEffectArg =
-  | undefined
-  | string
-  | { query: string }
-
-function noOp(): [AppEffect, AppEffectArg?] {
-  return [AppEffect.NoOp]
-}
-
-type AppEffectHandler = (arg?: AppEffectArg, dispatch?: Dispatch) => void
+type AppEffect =
+  | { type: 'NoOp' }
+  | { type: 'Log', message: string }
+  | { type: 'FetchContacts', query: string }
 
 interface CiviContact {
   contact_type: string,
@@ -158,34 +153,31 @@ interface CiviContact {
   modified_date: Date,
 }
 
-const effectHandlers: Record<AppEffect, AppEffectHandler> = {
+function handleEffect(effect: AppEffect, dispatch: Dispatch): void {
+  switch (effect.type) {
+    case 'NoOp': /* No op */ break
+    case 'FetchContacts': return fetchContacts(effect.query, dispatch)
+    case 'Log': return log(effect.message)
+  }
+}
 
-  [AppEffect.NoOp]: () => {
-    // No op
-  },
+function log(message: string) {
+  const date = new Date().toISOString()
+  console.log(`[${date}] ${message}`)
+}
 
-  [AppEffect.Log]: (arg) => {
-    const logArg = arg as string
-    const date = new Date().toISOString()
-    console.log(`[${date}] ${logArg}`)
-  },
-
-  [AppEffect.FetchContacts]: (arg, optionalDispatch) => {
-    const query = arg as string
-    const dispatch = optionalDispatch as Dispatch
-    dispatch({ type: 'FetchingContacts' })
-    console.log(`TODO: Fetch according to query: ${query}`)
-    window.CRM
-      .api4('Contact', 'get', { limit: 25 })
-      .then(
-        (contacts: Array<CiviContact>) => {
-          dispatch({ type: 'FetchedContacts', contacts: contacts })
-        },
-        (failure: Error) => {
-          dispatch({ type: 'FetchContactsFailed', failure: failure })
-        })
-  },
-
+function fetchContacts(query: string, dispatch: Dispatch) {
+  dispatch({ type: 'FetchingContacts' })
+  console.log(`TODO: Fetch according to query: ${query}`)
+  window.CRM
+    .api4('Contact', 'get', { limit: 25 })
+    .then(
+      (contacts: Array<CiviContact>) => {
+        dispatch({ type: 'FetchedContacts', contacts: contacts })
+      },
+      (failure: Error) => {
+        dispatch({ type: 'FetchContactsFailed', failure: failure })
+      })
 }
 
 //-- Runtime --//
@@ -199,9 +191,7 @@ const App = () => {
     if (model != change.model) {
       setModel(change.model)
     }
-    const [effect, effectArg] = change.effect
-    const handleEffect = effectHandlers[effect]
-    handleEffect(effectArg, dispatch)
+    handleEffect(change.effect, dispatch)
   }
 
   return view(model, dispatch)
@@ -220,15 +210,5 @@ window.initApp = (containerId: string) => {
   if (container) {
     const root = ReactDOM.createRoot(container)
     root.render(<App />)
-  }
-}
-
-function handleFetchContacts(model: AppModel): AppChange {
-  return {
-    model: model,
-    effect: [
-      AppEffect.FetchContacts,
-      model.query,
-    ]
   }
 }
