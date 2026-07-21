@@ -78,21 +78,16 @@ type AppChange = {
 
 function update(model: AppModel, message: AppMessage): AppChange {
   switch (message.type) {
-    case 'QueryChanged': return handleSaveQuery(model, message.query)
-    case 'SearchClicked': return handleFetchContacts(model)
-    case 'FetchingContacts': return handleFetchingContacts(model)
-    case 'FetchedContacts':
-      return handleFetchedContacts(model, message.contacts)
-    case 'FetchContactsFailed':
-      return handleFetchContactsFailed(model, message.failure)
-    default: return {
-      model: model,
-      effect: { type: 'NoOp' },
-    }
+    case 'QueryChanged': return saveQuery(model, message.query)
+    case 'SearchClicked': return fetchContacts(model)
+    case 'FetchingContacts': return indicateFetching(model)
+    case 'FetchedContacts': return saveFetchedContacts(model, message.contacts)
+    case 'FetchContactsFailed': return indicateFailure(model, message.failure)
+    default: return { model: model, effect: { type: 'NoOp' } }
   }
 }
 
-function handleSaveQuery(model: AppModel, query: string): AppChange {
+function saveQuery(model: AppModel, query: string): AppChange {
   return {
     model: {
       ...model,
@@ -102,7 +97,7 @@ function handleSaveQuery(model: AppModel, query: string): AppChange {
   }
 }
 
-function handleFetchingContacts(model: AppModel): AppChange {
+function indicateFetching(model: AppModel): AppChange {
   return {
     model: model,
     effect: {
@@ -112,14 +107,14 @@ function handleFetchingContacts(model: AppModel): AppChange {
   }
 }
 
-function handleFetchContacts(model: AppModel): AppChange {
+function fetchContacts(model: AppModel): AppChange {
   return {
     model: model,
     effect: { type: 'FetchContacts', query: model.query },
   }
 }
 
-function handleFetchedContacts(model: AppModel, contacts: CiviContact[] | undefined): AppChange {
+function saveFetchedContacts(model: AppModel, contacts: CiviContact[] | undefined): AppChange {
   return {
     model: {
       ...model,
@@ -129,7 +124,7 @@ function handleFetchedContacts(model: AppModel, contacts: CiviContact[] | undefi
   }
 }
 
-function handleFetchContactsFailed(model: AppModel, failure: Error): AppChange {
+function indicateFailure(model: AppModel, failure: Error): AppChange {
   return {
     model: model,
     effect: { type: 'Log', message: `Failed fetching contacts: ${failure}` },
