@@ -28,81 +28,83 @@ export namespace Core {
 
   export function view(model: Model, dispatch: Dispatch) {
     return <div className="noas-reach">
-      {viewForm(model.query, dispatch)}
-      {viewResults(model.contacts, dispatch)}
+      {View.form(model.query, dispatch)}
+      {View.results(model.contacts, dispatch)}
     </div>
   }
 
-  function viewForm(query: string, dispatch: Dispatch) {
-    return (
-      <fieldset>
-        <legend>Find contacts</legend>
-        <p>
-          <label>Query</label>
-          <input type="text"
-            autoFocus
-            value={query}
-            onChange={(event) => {
-              dispatch({ type: 'QueryChanged', query: event.target.value })
-            }}></input>
-        </p>
-        <p>
-          <button
-            onClick={() => {
-              dispatch({ type: 'SearchClicked' })
-            }}>
-            Search
-          </button>
-        </p>
-      </fieldset>)
-  }
+  namespace View {
+    export function form(query: string, dispatch: Dispatch) {
+      return (
+        <fieldset>
+          <legend>Find contacts</legend>
+          <p>
+            <label>Query</label>
+            <input type="text"
+              autoFocus
+              value={query}
+              onChange={(event) => {
+                dispatch({ type: 'QueryChanged', query: event.target.value })
+              }}></input>
+          </p>
+          <p>
+            <button
+              onClick={() => {
+                dispatch({ type: 'SearchClicked' })
+              }}>
+              Search
+            </button>
+          </p>
+        </fieldset>)
+    }
 
-  function viewResults(contacts: Contact[] | undefined, dispatch: Dispatch) {
-    return (
-      <fieldset>
-        <legend>Results</legend>
-        <table>
-          <thead>
-            <tr>
-              <th>Display name</th>
-              <th>First name</th>
-              <th>Last name</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {(contacts &&
-              contacts?.length != 0)
-              ? contacts.map(
-                (c, i) => (
-                  <tr key={i}>
-                    <td>{c.displayName}</td>
-                    <td>{c.firstName || 'N/A'}</td>
-                    <td>{c.lastName || 'N/A'}</td>
-                    <td>
-                      <button
-                        onClick={
-                          () => (dispatch(
-                            { type: 'DetailClicked', contact: c }
-                          ))
-                        }>
-                        Detail
-                      </button>
-                    </td>
-                  </tr>
+    export function results(contacts: Contact[] | undefined, dispatch: Dispatch) {
+      return (
+        <fieldset>
+          <legend>Results</legend>
+          <table>
+            <thead>
+              <tr>
+                <th>Display name</th>
+                <th>First name</th>
+                <th>Last name</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(contacts &&
+                contacts?.length != 0)
+                ? contacts.map(
+                  (c, i) => (
+                    <tr key={i}>
+                      <td>{c.displayName}</td>
+                      <td>{c.firstName || 'N/A'}</td>
+                      <td>{c.lastName || 'N/A'}</td>
+                      <td>
+                        <button
+                          onClick={
+                            () => (dispatch(
+                              { type: 'DetailClicked', contact: c }
+                            ))
+                          }>
+                          Detail
+                        </button>
+                      </td>
+                    </tr>
+                  )
                 )
-              )
-              : <tr>
-                <td colSpan={4}>
-                  <div style={{ textAlign: "center" }}>
-                    No result
-                  </div>
-                </td>
-              </tr>}
-          </tbody>
-        </table>
-      </fieldset>
-    )
+                : <tr>
+                  <td colSpan={4}>
+                    <div style={{ textAlign: "center" }}>
+                      No result
+                    </div>
+                  </td>
+                </tr>}
+            </tbody>
+          </table>
+        </fieldset>
+      )
+    }
   }
 
   //-- Update --//
@@ -122,17 +124,17 @@ export namespace Core {
 
   export function update(model: Model, message: Message): Change {
     switch (message.type) {
-      case 'QueryChanged': return Change.saveQuery(model, message.query)
-      case 'SearchClicked': return Change.startFetch(model)
-      case 'FetchContactsStarted': return Change.indicateFetching(model)
-      case 'FetchedContacts': return Change.importFetched(model, message.contacts)
-      case 'FetchContactsFailed': return Change.indicateFailure(model, message.failure)
-      case 'DetailClicked': return Change.openDetail(model, message.contact)
+      case 'QueryChanged': return Update.saveQuery(model, message.query)
+      case 'SearchClicked': return Update.startFetch(model)
+      case 'FetchContactsStarted': return Update.indicateFetching(model)
+      case 'FetchedContacts': return Update.importFetched(model, message.contacts)
+      case 'FetchContactsFailed': return Update.indicateFailure(model, message.failure)
+      case 'DetailClicked': return Update.openDetail(model, message.contact)
       default: return { model: model, effect: { type: 'NoOp' } }
     }
   }
 
-  namespace Change {
+  namespace Update {
     export function saveQuery(model: Model, query: string): Change {
       return {
         model: {
