@@ -22,19 +22,25 @@ export namespace Core {
     contacts: undefined,
   }
 
-  //-- View --//
-
   type Dispatch = (event: Message) => void
 
-  export function view(model: Model, dispatch: Dispatch) {
-    return <div className="noas-reach">
-      {View.form(model.query, dispatch)}
-      {View.results(model.contacts, dispatch)}
-    </div>
+  export type Change = {
+    model: Model
+    effect: Command
   }
 
-  namespace View {
-    export function form(query: string, dispatch: Dispatch) {
+  //-- View --//
+
+  export namespace View {
+
+    export function of(model: Model, dispatch: Dispatch) {
+      return <div className="noas-reach">
+        {form(model.query, dispatch)}
+        {results(model.contacts, dispatch)}
+      </div>
+    }
+
+    function form(query: string, dispatch: Dispatch) {
       return (
         <fieldset>
           <legend>Find contacts</legend>
@@ -58,7 +64,7 @@ export namespace Core {
         </fieldset>)
     }
 
-    export function results(contacts: Contact[] | undefined, dispatch: Dispatch) {
+    function results(contacts: Contact[] | undefined, dispatch: Dispatch) {
       return (
         <fieldset>
           <legend>Results</legend>
@@ -117,25 +123,31 @@ export namespace Core {
     | { type: 'FetchContactsFailed', failure: Error }
     | { type: 'DetailClicked', contact: Contact }
 
-  export type Change = {
-    model: Model
-    effect: Effect
+  interface CiviContact {
+    contact_type: string
+    display_name: string
+    first_name: string | undefined
+    last_name: string | undefined
+    organization_name: string | undefined
+    created_date: Date
+    modified_date: Date
   }
 
-  export function update(model: Model, message: Message): Change {
-    switch (message.type) {
-      case 'QueryChanged': return Update.saveQuery(model, message.query)
-      case 'SearchClicked': return Update.startFetch(model)
-      case 'FetchContactsStarted': return Update.indicateFetching(model)
-      case 'FetchedContacts': return Update.importFetched(model, message.contacts)
-      case 'FetchContactsFailed': return Update.indicateFailure(model, message.failure)
-      case 'DetailClicked': return Update.openDetail(model, message.contact)
-      default: return { model: model, effect: { type: 'NoOp' } }
+  export namespace Update {
+
+    export function of(model: Model, message: Message): Change {
+      switch (message.type) {
+        case 'QueryChanged': return saveQuery(model, message.query)
+        case 'SearchClicked': return startFetch(model)
+        case 'FetchContactsStarted': return indicateFetching(model)
+        case 'FetchedContacts': return importFetched(model, message.contacts)
+        case 'FetchContactsFailed': return indicateFailure(model, message.failure)
+        case 'DetailClicked': return openDetail(model, message.contact)
+        default: return { model: model, effect: { type: 'NoOp' } }
+      }
     }
-  }
 
-  namespace Update {
-    export function saveQuery(model: Model, query: string): Change {
+    function saveQuery(model: Model, query: string): Change {
       return {
         model: {
           ...model,
@@ -145,7 +157,7 @@ export namespace Core {
       }
     }
 
-    export function indicateFetching(model: Model): Change {
+    function indicateFetching(model: Model): Change {
       return {
         model: model,
         effect: {
@@ -155,8 +167,8 @@ export namespace Core {
       }
     }
 
-    export function startFetch(model: Model): Change {
-      const effect: Effect =
+    function startFetch(model: Model): Change {
+      const effect: Command =
         model.query
           ? { type: 'FetchContacts', query: model.query }
           : { type: 'ClearResults' }
@@ -166,7 +178,7 @@ export namespace Core {
       }
     }
 
-    export function importFetched(
+    function importFetched(
       model: Model,
       civiContacts: CiviContact[] | undefined,
     ): Change {
@@ -186,14 +198,14 @@ export namespace Core {
       }
     }
 
-    export function indicateFailure(model: Model, failure: Error): Change {
+    function indicateFailure(model: Model, failure: Error): Change {
       return {
         model: model,
         effect: { type: 'Log', message: `Failed fetching contacts: ${failure}` },
       }
     }
 
-    export function openDetail(model: Model, contact: Contact): Change {
+    function openDetail(model: Model, contact: Contact): Change {
       return {
         model: model,
         effect: {
@@ -204,76 +216,68 @@ export namespace Core {
     }
   }
 
-  //-- Effects --//
+  //-- Commands --//
 
-  export type Effect =
+  export type Command =
     | { type: 'NoOp' }
     | { type: 'Log', message: string }
     | { type: 'FetchContacts', query: string }
     | { type: 'ClearResults' }
 
-  interface CiviContact {
-    contact_type: string
-    display_name: string
-    first_name: string | undefined
-    last_name: string | undefined
-    organization_name: string | undefined
-    created_date: Date
-    modified_date: Date
-  }
+  export namespace Effect {
 
-  export type Context = {
-    api: (
-      endpoint: string,
-      method: string,
-      options: {
-        limit: number,
-        where: [[
-          fieldName: string,
-          operator: string,
-          fieldValue: string
-        ]]
-      }
-    ) => Promise<CiviContact[]>
-    log: (message: string) => void
-  }
+    export type Context = {
+      api: (
+        endpoint: string,
+        method: string,
+        options: {
+          limit: number,
+          where: [[
+            fieldName: string,
+            operator: string,
+            fieldValue: string
+          ]]
+        }
+      ) => Promise<CiviContact[]>
+      log: (message: string) => void
+    }
 
-  export const makeEffectHandler = (context: Context) =>
-
-    (effect: Effect, dispatch: Dispatch) => {
-
-      switch (effect.type) {
-        case 'NoOp': /* No op */ break
-        case 'FetchContacts': return fetchContacts(effect.query, dispatch)
-        case 'Log': return logMessage(effect.message)
-        case 'ClearResults': return clearResults()
-      }
-
-      function logMessage(message: string) {
-        const date = new Date().toISOString()
-        context.log(`[${date}] ${message}`)
-      }
-
-      function fetchContacts(query: string, dispatch: Dispatch) {
-        dispatch({ type: 'FetchContactsStarted' })
-        context
-          .api(
-            'Contact',
-            'get',
-            { limit: 25, where: [["display_name", "CONTAINS", query]], }
-          )
-          .then(
-            (contacts: CiviContact[]) => {
-              dispatch({ type: 'FetchedContacts', contacts: contacts })
-            },
-            (failure: Error) => {
-              dispatch({ type: 'FetchContactsFailed', failure: failure })
-            },
-          )
-      }
-
-      function clearResults() {
-        dispatch({ type: 'FetchedContacts', contacts: [] })
+    export function handler(context: Context, dispatch: Dispatch) {
+      return (command: Command) => {
+        switch (command.type) {
+          case 'NoOp': /* No op */ break
+          case 'FetchContacts': return fetchContacts(context, command.query, dispatch)
+          case 'Log': return log(context, command.message)
+          case 'ClearResults': return clearResults(dispatch)
+        }
       }
     }
+
+    function log(context: Context, message: string) {
+      const date = new Date().toISOString()
+      context.log(`[${date}] ${message}`)
+    }
+
+    function fetchContacts(context: Context, query: string, dispatch: Dispatch) {
+      dispatch({ type: 'FetchContactsStarted' })
+      context
+        .api(
+          'Contact',
+          'get',
+          { limit: 25, where: [["display_name", "CONTAINS", query]], }
+        )
+        .then(
+          (contacts: CiviContact[]) => {
+            dispatch({ type: 'FetchedContacts', contacts: contacts })
+          },
+          (failure: Error) => {
+            dispatch({ type: 'FetchContactsFailed', failure: failure })
+          },
+        )
+    }
+
+    function clearResults(dispatch: Dispatch) {
+      dispatch({ type: 'FetchedContacts', contacts: [] })
+    }
+  }
 }

@@ -6,7 +6,7 @@ import { Core } from './Core'
 //-- Runtime --//
 
 declare global {
-  interface Window extends Core.Context {
+  interface Window extends Core.Effect.Context {
     initApp: (containerId: string) => void
     CRM: any
   }
@@ -17,15 +17,15 @@ const Shell = () => {
   const [model, setModel] = useState<Core.Model>(Core.initialModel)
 
   function dispatch(message: Core.Message) {
-    const change = Core.update(model, message)
+    const change = Core.Update.of(model, message)
     if (model != change.model) {
       setModel(change.model)
     }
-    const handleEffect = Core.makeEffectHandler(window)
-    handleEffect(change.effect, dispatch)
+    const handleEffect = Core.Effect.handler(window, dispatch)
+    handleEffect(change.effect)
   }
 
-  return Core.view(model, dispatch)
+  return Core.View.of(model, dispatch)
 }
 
 window.log = console.log
