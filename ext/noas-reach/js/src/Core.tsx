@@ -50,13 +50,13 @@ export namespace Core {
               autoFocus
               value={query}
               onChange={(event) => {
-                dispatch({ type: 'QueryChanged', query: event.target.value })
+                dispatch({ event: Event.QueryChanged, query: event.target.value })
               }}></input>
           </p>
           <p>
             <button
               onClick={() => {
-                dispatch({ type: 'SearchClicked' })
+                dispatch({ event: Event.SearchClicked })
               }}>
               Search
             </button>
@@ -90,7 +90,7 @@ export namespace Core {
                         <button
                           onClick={
                             () => (dispatch(
-                              { type: 'DetailClicked', contact: c }
+                              { event: Event.DetailClicked, contact: c }
                             ))
                           }>
                           Detail
@@ -115,13 +115,22 @@ export namespace Core {
 
   //-- Update --//
 
+  enum Event {
+    QueryChanged,
+    SearchClicked,
+    FetchContactsStarted,
+    FetchedContacts,
+    FetchContactsFailed,
+    DetailClicked,
+  }
+
   export type Message =
-    | { type: 'QueryChanged', query: string }
-    | { type: 'SearchClicked' }
-    | { type: 'FetchContactsStarted' }
-    | { type: 'FetchedContacts', contacts: CiviContact[] | undefined }
-    | { type: 'FetchContactsFailed', failure: Error }
-    | { type: 'DetailClicked', contact: Contact }
+    | { event: Event.QueryChanged, query: string }
+    | { event: Event.SearchClicked }
+    | { event: Event.FetchedContacts, contacts: CiviContact[] | undefined }
+    | { event: Event.FetchContactsStarted }
+    | { event: Event.FetchContactsFailed, failure: Error }
+    | { event: Event.DetailClicked, contact: Contact }
 
   interface CiviContact {
     contact_type: string
@@ -136,13 +145,13 @@ export namespace Core {
   export namespace Update {
 
     export function of(model: Model, message: Message): Change {
-      switch (message.type) {
-        case 'QueryChanged': return saveQuery(model, message.query)
-        case 'SearchClicked': return startFetch(model)
-        case 'FetchContactsStarted': return indicateFetching(model)
-        case 'FetchedContacts': return importFetched(model, message.contacts)
-        case 'FetchContactsFailed': return indicateFailure(model, message.failure)
-        case 'DetailClicked': return openDetail(model, message.contact)
+      switch (message.event) {
+        case Event.QueryChanged: return saveQuery(model, message.query)
+        case Event.SearchClicked: return startFetch(model)
+        case Event.FetchContactsStarted: return indicateFetching(model)
+        case Event.FetchedContacts: return importFetched(model, message.contacts)
+        case Event.FetchContactsFailed: return indicateFailure(model, message.failure)
+        case Event.DetailClicked: return openDetail(model, message.contact)
         default: return { model: model, effect: { type: 'NoOp' } }
       }
     }
@@ -259,7 +268,7 @@ export namespace Core {
     }
 
     function fetchContacts(context: Context, query: string, dispatch: Dispatch) {
-      dispatch({ type: 'FetchContactsStarted' })
+      dispatch({ event: Event.FetchContactsStarted })
       context
         .api(
           'Contact',
@@ -268,16 +277,16 @@ export namespace Core {
         )
         .then(
           (contacts: CiviContact[]) => {
-            dispatch({ type: 'FetchedContacts', contacts: contacts })
+            dispatch({ event: Event.FetchedContacts, contacts: contacts })
           },
           (failure: Error) => {
-            dispatch({ type: 'FetchContactsFailed', failure: failure })
+            dispatch({ event: Event.FetchContactsFailed, failure: failure })
           },
         )
     }
 
     function clearResults(dispatch: Dispatch) {
-      dispatch({ type: 'FetchedContacts', contacts: [] })
+      dispatch({ event: Event.FetchedContacts, contacts: [] })
     }
   }
 }
