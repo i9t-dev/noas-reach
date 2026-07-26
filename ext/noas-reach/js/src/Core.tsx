@@ -26,7 +26,7 @@ export namespace Core {
 
   export type Change = {
     model: Model
-    effect: Command
+    command: Command
   }
 
   //-- View --//
@@ -42,81 +42,113 @@ export namespace Core {
 
     function form(query: string, dispatch: Dispatch) {
       return (
-        <fieldset style={{ textAlign: 'center' }}>
+        <fieldset>
           <legend>Find contacts</legend>
-          <p>
+          <div style={{ textAlign: 'center', width: "50em", margin: "auto" }}>
             <div>
-              <label>Query</label>
+              <div>
+                <label>Query</label>
+              </div>
+              <div>
+                <input
+                  style={{ width: '50em' }}
+                  type="text"
+                  autoFocus
+                  value={query}
+                  onChange={(event) => {
+                    dispatch(
+                      { event: Event.QueryChanged, query: event.target.value }
+                    )
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.key == "Enter") {
+                      dispatch({ event: Event.SearchClicked })
+                    }
+                  }}></input>
+              </div>
             </div>
-            <div>
-              <input
-                style={{ width: '40%' }}
-                type="text"
-                autoFocus
-                value={query}
-                onChange={(event) => {
-                  dispatch(
-                    { event: Event.QueryChanged, query: event.target.value }
-                  )
-                }}
-                onKeyDown={(event) => {
-                  if (event.key == "Enter") {
-                    dispatch({ event: Event.SearchClicked })
-                  }
-                }}></input>
-            </div>
-          </p>
-          <p>
-            <button onClick={() => {
-              dispatch({ event: Event.SearchClicked })
-            }}>
-              Search
-            </button>
-          </p>
+            <p>
+              <button onClick={() => {
+                dispatch({ event: Event.SearchClicked })
+              }}>
+                Search
+              </button>
+              <button style={{ marginLeft: ".5em" }} onClick={() => {
+                console.log("To do: Reset")
+              }}>
+                Clear
+              </button>
+
+            </p>
+          </div>
         </fieldset>)
     }
 
     function results(contacts: Contact[] | undefined, dispatch: Dispatch) {
-      return <fieldset>
-        <legend>Results</legend>
-        <table>
-          <thead>
-            <tr>
-              <th>Display name</th>
-              <th>First name</th>
-              <th>Last name</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {(contacts &&
-              contacts?.length != 0)
-              ? contacts.map(
-                (c, i) => (
-                  <tr key={i}>
-                    <td>{c.displayName}</td>
-                    <td>{c.firstName || 'N/A'}</td>
-                    <td>{c.lastName || 'N/A'}</td>
-                    <td>
-                      <button onClick={() => (
-                        dispatch({ event: Event.DetailClicked, contact: c })
-                      )}>
-                        Detail
-                      </button>
-                    </td>
-                  </tr>
+      if (contacts == undefined) {
+        return <div style={{
+          width: "50em",
+          margin: 'auto',
+        }}>
+          <p style={{ textAlign: 'center' }}>
+            Please fill in the search form and press the search button.
+          </p>
+          <div style={{
+            background: "lightgray",
+            padding: '1em',
+          }}>Search options:
+            <ul>
+              <li>
+                <code>name</code>: match the name of contacts
+              </li>
+              <li>
+                <code>type</code>: type of contact (either "org" or "person")
+              </li> 
+            </ul>
+          </div>
+        </div>
+      } else {
+        return <fieldset>
+          <legend>Results</legend>
+          <table>
+            <thead>
+              <tr>
+                <th>Display name</th>
+                <th>First name</th>
+                <th>Last name</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(contacts &&
+                contacts?.length != 0)
+                ? contacts.map(
+                  (c, i) => (
+                    <tr key={i}>
+                      <td>{c.displayName}</td>
+                      <td>{c.firstName || 'N/A'}</td>
+                      <td>{c.lastName || 'N/A'}</td>
+                      <td>
+                        <button onClick={() => (
+                          dispatch({ event: Event.DetailClicked, contact: c })
+                        )}>
+                          Detail
+                        </button>
+                      </td>
+                    </tr>
+                  )
                 )
-              )
-              : <tr>
-                <td colSpan={4}>
-                  <div style={{ textAlign: "center" }}>
-                    No result
-                  </div>
-                </td>
-              </tr>}
-          </tbody>
-        </table>
-      </fieldset>
+                : <tr>
+                  <td colSpan={4}>
+                    <div style={{ textAlign: "center" }}>
+                      No result
+                    </div>
+                  </td>
+                </tr>}
+            </tbody>
+          </table>
+        </fieldset>
+      }
     }
   }
 
@@ -166,7 +198,7 @@ export namespace Core {
         case Event.DetailClicked:
           return openDetail(model, message.contact)
         default:
-          return { model: model, effect: { type: 'NoOp' } }
+          return { model: model, command: { type: 'NoOp' } }
       }
     }
 
@@ -176,14 +208,14 @@ export namespace Core {
           ...model,
           query: query
         },
-        effect: { type: 'NoOp' },
+        command: { type: 'NoOp' },
       }
     }
 
     function indicateFetching(model: Model): Change {
       return {
         model: model,
-        effect: {
+        command: {
           type: 'Log',
           message: `Fetching contacts matching query: ${model.query}`,
         },
@@ -191,13 +223,13 @@ export namespace Core {
     }
 
     function startFetch(model: Model): Change {
-      const effect: Command =
+      const command: Command =
         model.query
           ? { type: 'FetchContacts', query: model.query }
           : { type: 'ClearResults' }
       return {
         model: model,
-        effect: effect,
+        command: command,
       }
     }
 
@@ -217,14 +249,14 @@ export namespace Core {
               }
             }),
         },
-        effect: { type: 'NoOp' },
+        command: { type: 'NoOp' },
       }
     }
 
     function indicateFailure(model: Model, failure: Error): Change {
       return {
         model: model,
-        effect: {
+        command: {
           type: 'Log',
           message: `Failed fetching contacts: ${failure}`
         },
@@ -234,7 +266,7 @@ export namespace Core {
     function openDetail(model: Model, contact: Contact): Change {
       return {
         model: model,
-        effect: {
+        command: {
           type: 'Log',
           message: `TODO: Open detail for contact: ${contact.displayName}`,
         }

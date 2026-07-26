@@ -17,12 +17,13 @@ const Shell = () => {
   const [model, setModel] = useState<Core.Model>(Core.initialModel)
 
   function dispatch(message: Core.Message) {
-    const change = Core.Update.of(model, message)
+    const change: Core.Change = Core.Update.of(model, message)
+    console.log(`Changed model query: ${change.model.query}`)
     if (model != change.model) {
       setModel(change.model)
     }
     const handleEffect = Core.Effect.handler(window, dispatch)
-    handleEffect(change.effect)
+    handleEffect(change.command)
   }
 
   return Core.View.of(model, dispatch)
