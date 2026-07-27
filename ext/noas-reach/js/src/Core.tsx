@@ -93,7 +93,6 @@ export namespace Core {
                 }}>
                 Clear
               </button>
-
             </p>
           </div>
         </fieldset>)
@@ -101,80 +100,94 @@ export namespace Core {
 
     function results(contacts: Contact[] | undefined, dispatch: Dispatch) {
       if (contacts == undefined) {
-        return <div style={{
-          width: "50em",
-          margin: 'auto',
-        }}>
-          <p style={{ textAlign: 'center' }}>
-            Please fill in the search form and press the search button.
-          </p>
-          <div style={{
-            background: "lightgray",
-            padding: '1em',
-          }}>
-            <p>The query takes the following form: </p>
-            <p><code>[text] [option1:value1] [option2:value2] [...]</code></p>
-            Available options:
-            <ul>
-              <li>
-                <code>[pattern]</code>: Match any contact property ({globHelpLink()})
-              </li>
-              <li>
-                <code>name:&lt;pattern&gt;</code>: Match contacts by name
-                ({globHelpLink()})
-              </li>
-              <li>
-                <code>email:&lt;pattern&gt;</code>: Match contacts by email
-                ({globHelpLink()})
-              </li>
-              <li>
-                <code>type:&lt;text&gt;</code>: Specify a type of contact (either "org", "person" or "all")
-              </li>
-            </ul>
-          </div>
-        </div>
+        return helpBlock()
       } else {
-        return <fieldset>
-          <legend>Results</legend>
-          <table>
-            <thead>
-              <tr>
-                <th>Display name</th>
-                <th>First name</th>
-                <th>Last name</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {(contacts &&
-                contacts?.length != 0)
-                ? contacts.map(
-                  (c, i) => (
-                    <tr key={i}>
-                      <td>{c.displayName}</td>
-                      <td>{c.firstName || 'N/A'}</td>
-                      <td>{c.lastName || 'N/A'}</td>
-                      <td>
-                        <button onClick={() => (
-                          dispatch({ event: Event.DetailClicked, contact: c })
-                        )}>
-                          Detail
-                        </button>
-                      </td>
-                    </tr>
-                  )
-                )
-                : <tr>
-                  <td colSpan={4}>
-                    <div style={{ textAlign: "center" }}>
-                      No result
-                    </div>
-                  </td>
-                </tr>}
-            </tbody>
-          </table>
-        </fieldset>
+        return resultsFieldset(contacts, dispatch)
       }
+    }
+
+    function resultsFieldset(contacts: Contact[], dispatch: Dispatch) {
+      return <fieldset>
+        <legend>Results</legend>
+        <table>
+          <thead>
+            <tr>
+              <th>Display name</th>
+              <th>First name</th>
+              <th>Last name</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {contacts?.length != 0
+              ? contactRows(contacts, dispatch)
+              : emptyContactsRow()}
+          </tbody>
+        </table>
+      </fieldset>
+    }
+
+    function emptyContactsRow(): React.ReactNode {
+      return <tr>
+        <td colSpan={4}>
+          <div style={{ textAlign: "center" }}>
+            No result
+          </div>
+        </td>
+      </tr>
+    }
+
+    function contactRows(contacts: Contact[], dispatch: Dispatch) {
+      return <>
+        {contacts.map(
+          (c, i) => (
+            <tr key={i}>
+              <td>{c.displayName}</td>
+              <td>{c.firstName || 'N/A'}</td>
+              <td>{c.lastName || 'N/A'}</td>
+              <td>
+                <button onClick={() => (
+                  dispatch({ event: Event.DetailClicked, contact: c })
+                )}>
+                  Detail
+                </button>
+              </td>
+            </tr>
+          )
+        )}
+      </>
+    }
+
+    function helpBlock() {
+      return <div style={{ width: "50em", margin: 'auto' }}>
+        <p style={{ textAlign: 'center' }}>
+          Please fill in the search form and press the search button.
+        </p>
+        <div style={{
+          background: "lightgray",
+          padding: '1em',
+        }}>
+          <p>The query takes the following form: </p>
+          <p><code>[text] [option1:value1] [option2:value2] [...]</code></p>
+          Available options:
+          <ul>
+            <li>
+              <code>[pattern]</code>: Match any contact property ({globHelpLink()})
+            </li>
+            <li>
+              <code>name:&lt;pattern&gt;</code>: Match contacts by name
+              ({globHelpLink()})
+            </li>
+            <li>
+              <code>email:&lt;pattern&gt;</code>: Match contacts by email
+              ({globHelpLink()})
+            </li>
+            <li>
+              <code>type:&lt;text&gt;</code>: Specify a type of contact (either "org", "person" or "all")
+            </li>
+          </ul>
+        </div>
+      </div>
     }
 
     function globHelpLink() {
