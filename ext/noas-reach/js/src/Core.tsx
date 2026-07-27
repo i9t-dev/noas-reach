@@ -74,7 +74,7 @@ export namespace Core {
                 Search
               </button>
               <button style={{ marginLeft: ".5em" }} onClick={() => {
-                console.log("To do: Reset")
+                dispatch({ event: Event.Reset })
               }}>
                 Clear
               </button>
@@ -103,7 +103,7 @@ export namespace Core {
               </li>
               <li>
                 <code>type</code>: type of contact (either "org" or "person")
-              </li> 
+              </li>
             </ul>
           </div>
         </div>
@@ -161,6 +161,7 @@ export namespace Core {
     FetchedContacts,
     FetchContactsFailed,
     DetailClicked,
+    Reset,
   }
 
   export type Message =
@@ -170,6 +171,7 @@ export namespace Core {
     | { event: Event.FetchContactsStarted }
     | { event: Event.FetchContactsFailed, failure: Error }
     | { event: Event.DetailClicked, contact: Contact }
+    | { event: Event.Reset }
 
   interface CiviContact {
     contact_type: string
@@ -197,6 +199,8 @@ export namespace Core {
           return indicateFailure(model, message.failure)
         case Event.DetailClicked:
           return openDetail(model, message.contact)
+        case Event.Reset:
+          return reset(model)
         default:
           return { model: model, command: { type: 'NoOp' } }
       }
@@ -272,6 +276,17 @@ export namespace Core {
         }
       }
     }
+
+    function reset(model: Model): Change {
+      return {
+        model: {
+          ...model,
+          query: "",
+          contacts: undefined,
+        },
+        command: { type: 'NoOp' },
+      }
+    }
   }
 
   //-- Commands --//
@@ -321,6 +336,7 @@ export namespace Core {
 
     function fetchContacts(context: Context, query: string, dispatch: Dispatch) {
       dispatch({ event: Event.FetchContactsStarted })
+      context.log(`Calling fetch-contact API for query: ${query}`)
       context
         .api(
           'Contact',

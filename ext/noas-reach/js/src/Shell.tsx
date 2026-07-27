@@ -17,9 +17,10 @@ const Shell = () => {
   const [model, setModel] = useState<Core.Model>(Core.initialModel)
 
   function dispatch(message: Core.Message) {
+    console.log(`Dispatching message: ${JSON.stringify(message)}`)
     const change: Core.Change = Core.Update.of(model, message)
-    console.log(`Changed model query: ${change.model.query}`)
     if (model != change.model) {
+      console.log(`Setting model to ${JSON.stringify(change.model)}`)
       setModel(change.model)
     }
     const handleEffect = Core.Effect.handler(window, dispatch)
