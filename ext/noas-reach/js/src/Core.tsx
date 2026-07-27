@@ -111,13 +111,24 @@ export namespace Core {
           <div style={{
             background: "lightgray",
             padding: '1em',
-          }}>Search options:
+          }}>
+            <p>The query takes the following form: </p>
+            <p><code>[text] [option1:value1] [option2:value2] [...]</code></p>
+            Available options:
             <ul>
               <li>
-                <code>name</code>: match the name of contacts
+                <code>[pattern]</code>: Match any contact property ({globHelpLink()})
               </li>
               <li>
-                <code>type</code>: type of contact (either "org" or "person")
+                <code>name:&lt;pattern&gt;</code>: Match contacts by name
+                ({globHelpLink()})
+              </li>
+              <li>
+                <code>email:&lt;pattern&gt;</code>: Match contacts by email
+                ({globHelpLink()})
+              </li>
+              <li>
+                <code>type:&lt;text&gt;</code>: Specify a type of contact (either "org", "person" or "all")
               </li>
             </ul>
           </div>
@@ -164,6 +175,14 @@ export namespace Core {
           </table>
         </fieldset>
       }
+    }
+
+    function globHelpLink() {
+      return <a
+        href="https://en.wikipedia.org/wiki/Glob_(programming)"
+        target="help-target">
+        glob pattern
+      </a>
     }
   }
 
