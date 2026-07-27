@@ -68,14 +68,29 @@ export namespace Core {
               </div>
             </div>
             <p>
-              <button onClick={() => {
-                dispatch({ event: Event.SearchClicked })
-              }}>
+              <button
+                style={{
+                  display: 'inline',
+                  maxWidth: '7em',
+                  width: '7em',
+                  textAlign: 'center',
+                }}
+                onClick={() => {
+                  dispatch({ event: Event.SearchClicked })
+                }}>
                 Search
               </button>
-              <button style={{ marginLeft: ".5em" }} onClick={() => {
-                dispatch({ event: Event.Reset })
-              }}>
+              <button
+                style={{
+                  display: 'inline',
+                  maxWidth: '7em',
+                  width: '7em',
+                  textAlign: 'center',
+                  marginLeft: ".5em",
+                }}
+                onClick={() => {
+                  dispatch({ event: Event.Reset })
+                }}>
                 Clear
               </button>
 
