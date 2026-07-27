@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { useState } from 'react'
 import ReactDOM from 'react-dom/client'
 import { Core } from './Core'
@@ -14,16 +14,15 @@ declare global {
 
 const Shell = () => {
 
-  const [model, setModel] = useState<Core.Model>(Core.initialModel)
+  const [change, setChange] = useState<Core.Change>(Core.initialChange)
+  const model = useMemo(() => change.model, [change.model])
 
   function dispatch(message: Core.Message) {
-    const change: Core.Change = Core.Update.of(model, message)
-    console.log(`Changed model query: ${change.model.query}`)
-    if (model != change.model) {
-      setModel(change.model)
-    }
+    const nextChange = Core.Update.of(model, message)
+    console.log(`Next change: ${JSON.stringify(nextChange, undefined, 2)}`)
+    setChange(nextChange)
     const handleEffect = Core.Effect.handler(window, dispatch)
-    handleEffect(change.command)
+    handleEffect(nextChange.command)
   }
 
   return Core.View.of(model, dispatch)

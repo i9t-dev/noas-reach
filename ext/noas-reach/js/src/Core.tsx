@@ -16,10 +16,13 @@ export namespace Core {
     lastName: string | undefined,
   }
 
-  export const initialModel: Model = {
-    name: "Noah's Reach",
-    query: "",
-    contacts: undefined,
+  export const initialChange: Change = {
+    model: {
+      name: "Noah's Reach",
+      query: "",
+      contacts: undefined,
+    },
+    command: { type: 'NoOp' },
   }
 
   type Dispatch = (event: Message) => void
@@ -103,7 +106,7 @@ export namespace Core {
               </li>
               <li>
                 <code>type</code>: type of contact (either "org" or "person")
-              </li> 
+              </li>
             </ul>
           </div>
         </div>
