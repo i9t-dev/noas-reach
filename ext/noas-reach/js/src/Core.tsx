@@ -26,7 +26,7 @@ export namespace Core {
 
   export type Change = {
     model: Model
-    command: Command
+    command: Effect.Command
   }
 
   //-- View --//
@@ -217,7 +217,7 @@ export namespace Core {
         case Event.Reset:
           return reset(model)
         default:
-          return { model: model, command: { type: 'NoOp' } }
+          return { model: model, command: { type: Effect.Type.NoOp } }
       }
     }
 
@@ -227,7 +227,7 @@ export namespace Core {
           ...model,
           query: query
         },
-        command: { type: 'NoOp' },
+        command: { type: Effect.Type.NoOp },
       }
     }
 
@@ -235,17 +235,17 @@ export namespace Core {
       return {
         model: model,
         command: {
-          type: 'Log',
+          type: Effect.Type.Log,
           message: `Fetching contacts matching query: ${model.query}`,
         },
       }
     }
 
     function startFetch(model: Model): Change {
-      const command: Command =
+      const command: Effect.Command =
         model.query
-          ? { type: 'FetchContacts', query: model.query }
-          : { type: 'ClearResults' }
+          ? { type: Effect.Type.FetchContacts, query: model.query }
+          : { type: Effect.Type.ClearResults }
       return {
         model: model,
         command: command,
@@ -268,7 +268,7 @@ export namespace Core {
               }
             }),
         },
-        command: { type: 'NoOp' },
+        command: { type: Effect.Type.NoOp },
       }
     }
 
@@ -276,7 +276,7 @@ export namespace Core {
       return {
         model: model,
         command: {
-          type: 'Log',
+          type: Effect.Type.Log,
           message: `Failed fetching contacts: ${failure}`
         },
       }
@@ -286,7 +286,7 @@ export namespace Core {
       return {
         model: model,
         command: {
-          type: 'Log',
+          type: Effect.Type.Log,
           message: `TODO: Open detail for contact: ${contact.displayName}`,
         }
       }
@@ -299,20 +299,27 @@ export namespace Core {
           query: "",
           contacts: undefined,
         },
-        command: { type: 'NoOp' },
+        command: { type: Effect.Type.NoOp },
       }
     }
   }
 
   //-- Commands --//
 
-  export type Command =
-    | { type: 'NoOp' }
-    | { type: 'Log', message: string }
-    | { type: 'FetchContacts', query: string }
-    | { type: 'ClearResults' }
-
   export namespace Effect {
+
+    export enum Type {
+      NoOp,
+      Log,
+      FetchContacts,
+      ClearResults,
+    }
+
+    export type Command =
+      | { type: Type.NoOp }
+      | { type: Type.Log, message: string }
+      | { type: Type.FetchContacts, query: string }
+      | { type: Type.ClearResults }
 
     export type Context = {
       api: (
@@ -333,12 +340,12 @@ export namespace Core {
     export function handler(context: Context, dispatch: Dispatch) {
       return (command: Command) => {
         switch (command.type) {
-          case 'NoOp': /* No op */ break
-          case 'FetchContacts':
+          case Type.NoOp: /* No op */ break
+          case Type.FetchContacts:
             return fetchContacts(context, command.query, dispatch)
-          case 'Log':
+          case Type.Log:
             return log(context, command.message)
-          case 'ClearResults':
+          case Type.ClearResults:
             return clearResults(dispatch)
         }
       }
