@@ -34,7 +34,7 @@ export namespace Core {
   export namespace View {
 
     export function of(model: Model, dispatch: Dispatch) {
-      return <div className="noas-reach">
+      return <div style={{ marginBottom: "2em" }} className="noas-reach">
         {form(model.query, dispatch)}
         {results(model.contacts, dispatch)}
       </div>
