@@ -4,10 +4,18 @@ export enum Operation {
     FetchContacts,
 }
 
-export type Command =
+export type Dispatch<MsgT> = (event: MsgT) => void
+
+export type Command<MsgT> =
     | { op: Operation.NoOp }
     | { op: Operation.Log, message: string }
-    | { op: Operation.FetchContacts, query: string }
+    | {
+        op: Operation.FetchContacts,
+        query: string,
+        onStart: MsgT,
+        onSuccessOf: (contacts: CiviContact[]) => MsgT,
+        onFailureOf: (failure: Error) => MsgT,
+    }
 
 export interface CiviContact {
     contact_type: string

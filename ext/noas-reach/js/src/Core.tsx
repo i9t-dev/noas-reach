@@ -1,5 +1,5 @@
 import React from 'react'
-import { CiviContact, Command, Operation } from './Command'
+import { CiviContact, Command, Dispatch, Operation } from './Command'
 
 export namespace Core {
 
@@ -23,11 +23,9 @@ export namespace Core {
     contacts: undefined,
   }
 
-  export type Dispatch = (event: Message) => void
-
   export type Change = {
     model: Model
-    command: Command
+    command: Command<Message>
   }
 
   //-- View --//
@@ -99,7 +97,7 @@ export namespace Core {
         </fieldset>)
     }
 
-    function results(contacts: Contact[] | undefined, dispatch: Dispatch) {
+    function results(contacts: Contact[] | undefined, dispatch: Dispatch<Message>) {
       if (contacts == undefined) {
         return helpBlock()
       } else {
@@ -107,7 +105,7 @@ export namespace Core {
       }
     }
 
-    function resultsFieldset(contacts: Contact[], dispatch: Dispatch) {
+    function resultsFieldset(contacts: Contact[], dispatch: Dispatch<Message>) {
       return <fieldset>
         <legend>Results</legend>
         <table>
@@ -217,7 +215,7 @@ export namespace Core {
     | { ev: Event.SearchClicked }
     | { ev: Event.FetchedContacts, contacts: CiviContact[] | undefined }
     | { ev: Event.FetchContactsStarted }
-    | { ev: Event.FetchContactsFailed, failure: Error }
+    | { ev: Event.FetchContactsFailed, failure: Error | undefined }
     | { ev: Event.DetailClicked, contact: Contact }
     | { ev: Event.Reset }
 
@@ -268,7 +266,15 @@ export namespace Core {
       return model.query
         ? {
           model: model,
-          command: { op: Operation.FetchContacts, query: model.query },
+          command: {
+            op: Operation.FetchContacts,
+            query: model.query,
+            onStart: { ev: Event.FetchContactsStarted },
+            onSuccessOf: (contacts: CiviContact[]) =>
+              ({ ev: Event.FetchedContacts, contacts: contacts }),
+            onFailureOf: (failure) =>
+              ({ ev: Event.FetchContactsFailed, failure: failure }),
+          },
         }
         : {
           model: { ...model, contacts: undefined },
@@ -296,7 +302,10 @@ export namespace Core {
       }
     }
 
-    function indicateFailure(model: Model, failure: Error): Change {
+    function indicateFailure(
+      model: Model,
+      failure: Error | undefined
+    ): Change {
       return {
         model: model,
         command: {
