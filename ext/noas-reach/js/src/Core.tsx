@@ -274,12 +274,15 @@ export namespace Core {
     }
 
     function startFetch(model: Model): Change {
-      return {
-        model: model,
-        command: model.query
-          ? { op: Operation.FetchContacts, query: model.query }
-          : { op: Operation.ClearResults },
-      }
+      return model.query
+        ? {
+          model: model,
+          command: { op: Operation.FetchContacts, query: model.query },
+        }
+        : {
+          model: { ...model, contacts: undefined },
+          command: { op: Operation.NoOp },
+        }
     }
 
     function importFetched(
@@ -340,14 +343,12 @@ export namespace Core {
     NoOp,
     Log,
     FetchContacts,
-    ClearResults,
   }
 
   export type Command =
     | { op: Operation.NoOp }
     | { op: Operation.Log, message: string }
     | { op: Operation.FetchContacts, query: string }
-    | { op: Operation.ClearResults }
 
   export namespace Effect {
 
@@ -372,11 +373,19 @@ export namespace Core {
         switch (command.op) {
           case Operation.NoOp: /* No op */ break
           case Operation.FetchContacts:
-            return fetchContacts(context, command.query, dispatch)
+            return fetchContacts(
+              context,
+              command.query,
+              () => { dispatch({ ev: Event.FetchContactsStarted }) },
+              (contacts: CiviContact[]) => {
+                dispatch({ ev: Event.FetchedContacts, contacts: contacts })
+              },
+              (failure: Error) => {
+                dispatch({ ev: Event.FetchContactsFailed, failure: failure })
+              },
+            )
           case Operation.Log:
             return log(context, command.message)
-          case Operation.ClearResults:
-            return clearResults(dispatch)
         }
       }
     }
@@ -386,8 +395,14 @@ export namespace Core {
       context.log(`[${date}] ${message}`)
     }
 
-    function fetchContacts(context: Context, query: string, dispatch: Dispatch) {
-      dispatch({ ev: Event.FetchContactsStarted })
+    function fetchContacts(
+      context: Context,
+      query: string,
+      onStart: () => void,
+      onSuccess: (contacts: CiviContact[]) => void,
+      onFailure: (error: Error) => void,
+    ) {
+      onStart()
       context.log(`Calling fetch-contact API for query: ${query}`)
       context
         .api(
@@ -396,17 +411,9 @@ export namespace Core {
           { limit: 25, where: [["display_name", "CONTAINS", query]], }
         )
         .then(
-          (contacts: CiviContact[]) => {
-            dispatch({ ev: Event.FetchedContacts, contacts: contacts })
-          },
-          (failure: Error) => {
-            dispatch({ ev: Event.FetchContactsFailed, failure: failure })
-          },
+          (contacts: CiviContact[]) => { onSuccess(contacts) },
+          (failure: Error) => { onFailure(failure) },
         )
-    }
-
-    function clearResults(dispatch: Dispatch) {
-      dispatch({ ev: Event.FetchedContacts, contacts: undefined })
     }
   }
 }
