@@ -26,7 +26,7 @@ export namespace Core {
 
   export type Change = {
     model: Model
-    command: Effect.Command
+    command: Command
   }
 
   //-- View --//
@@ -57,12 +57,12 @@ export namespace Core {
                   value={query}
                   onChange={(event) => {
                     dispatch(
-                      { event: Event.QueryChanged, query: event.target.value }
+                      { ev: Event.QueryChanged, query: event.target.value }
                     )
                   }}
                   onKeyDown={(event) => {
                     if (event.key == "Enter") {
-                      dispatch({ event: Event.SearchClicked })
+                      dispatch({ ev: Event.SearchClicked })
                     }
                   }}></input>
               </div>
@@ -76,7 +76,7 @@ export namespace Core {
                   textAlign: 'center',
                 }}
                 onClick={() => {
-                  dispatch({ event: Event.SearchClicked })
+                  dispatch({ ev: Event.SearchClicked })
                 }}>
                 Search
               </button>
@@ -89,7 +89,7 @@ export namespace Core {
                   marginLeft: ".5em",
                 }}
                 onClick={() => {
-                  dispatch({ event: Event.Reset })
+                  dispatch({ ev: Event.Reset })
                 }}>
                 Clear
               </button>
@@ -147,7 +147,7 @@ export namespace Core {
               <td>{c.lastName || 'N/A'}</td>
               <td>
                 <button onClick={() => (
-                  dispatch({ event: Event.DetailClicked, contact: c })
+                  dispatch({ ev: Event.DetailClicked, contact: c })
                 )}>
                   Detail
                 </button>
@@ -212,13 +212,13 @@ export namespace Core {
   }
 
   export type Message =
-    | { event: Event.QueryChanged, query: string }
-    | { event: Event.SearchClicked }
-    | { event: Event.FetchedContacts, contacts: CiviContact[] | undefined }
-    | { event: Event.FetchContactsStarted }
-    | { event: Event.FetchContactsFailed, failure: Error }
-    | { event: Event.DetailClicked, contact: Contact }
-    | { event: Event.Reset }
+    | { ev: Event.QueryChanged, query: string }
+    | { ev: Event.SearchClicked }
+    | { ev: Event.FetchedContacts, contacts: CiviContact[] | undefined }
+    | { ev: Event.FetchContactsStarted }
+    | { ev: Event.FetchContactsFailed, failure: Error }
+    | { ev: Event.DetailClicked, contact: Contact }
+    | { ev: Event.Reset }
 
   interface CiviContact {
     contact_type: string
@@ -233,7 +233,7 @@ export namespace Core {
   export namespace Update {
 
     export function of(model: Model, message: Message): Change {
-      switch (message.event) {
+      switch (message.ev) {
         case Event.QueryChanged:
           return saveQuery(model, message.query)
         case Event.SearchClicked:
@@ -249,7 +249,7 @@ export namespace Core {
         case Event.Reset:
           return reset(model)
         default:
-          return { model: model, command: { type: Effect.Type.NoOp } }
+          return { model: model, command: { op: Operation.NoOp } }
       }
     }
 
@@ -259,7 +259,7 @@ export namespace Core {
           ...model,
           query: query
         },
-        command: { type: Effect.Type.NoOp },
+        command: { op: Operation.NoOp },
       }
     }
 
@@ -267,20 +267,18 @@ export namespace Core {
       return {
         model: model,
         command: {
-          type: Effect.Type.Log,
+          op: Operation.Log,
           message: `Fetching contacts matching query: ${model.query}`,
         },
       }
     }
 
     function startFetch(model: Model): Change {
-      const command: Effect.Command =
-        model.query
-          ? { type: Effect.Type.FetchContacts, query: model.query }
-          : { type: Effect.Type.ClearResults }
       return {
         model: model,
-        command: command,
+        command: model.query
+          ? { op: Operation.FetchContacts, query: model.query }
+          : { op: Operation.ClearResults },
       }
     }
 
@@ -300,7 +298,7 @@ export namespace Core {
               }
             }),
         },
-        command: { type: Effect.Type.NoOp },
+        command: { op: Operation.NoOp },
       }
     }
 
@@ -308,7 +306,7 @@ export namespace Core {
       return {
         model: model,
         command: {
-          type: Effect.Type.Log,
+          op: Operation.Log,
           message: `Failed fetching contacts: ${failure}`
         },
       }
@@ -318,7 +316,7 @@ export namespace Core {
       return {
         model: model,
         command: {
-          type: Effect.Type.Log,
+          op: Operation.Log,
           message: `TODO: Open detail for contact: ${contact.displayName}`,
         }
       }
@@ -331,27 +329,27 @@ export namespace Core {
           query: "",
           contacts: undefined,
         },
-        command: { type: Effect.Type.NoOp },
+        command: { op: Operation.NoOp },
       }
     }
   }
 
   //-- Commands --//
 
+  export enum Operation {
+    NoOp,
+    Log,
+    FetchContacts,
+    ClearResults,
+  }
+
+  export type Command =
+    | { op: Operation.NoOp }
+    | { op: Operation.Log, message: string }
+    | { op: Operation.FetchContacts, query: string }
+    | { op: Operation.ClearResults }
+
   export namespace Effect {
-
-    export enum Type {
-      NoOp,
-      Log,
-      FetchContacts,
-      ClearResults,
-    }
-
-    export type Command =
-      | { type: Type.NoOp }
-      | { type: Type.Log, message: string }
-      | { type: Type.FetchContacts, query: string }
-      | { type: Type.ClearResults }
 
     export type Context = {
       api: (
@@ -371,13 +369,13 @@ export namespace Core {
 
     export function handler(context: Context, dispatch: Dispatch) {
       return (command: Command) => {
-        switch (command.type) {
-          case Type.NoOp: /* No op */ break
-          case Type.FetchContacts:
+        switch (command.op) {
+          case Operation.NoOp: /* No op */ break
+          case Operation.FetchContacts:
             return fetchContacts(context, command.query, dispatch)
-          case Type.Log:
+          case Operation.Log:
             return log(context, command.message)
-          case Type.ClearResults:
+          case Operation.ClearResults:
             return clearResults(dispatch)
         }
       }
@@ -389,7 +387,7 @@ export namespace Core {
     }
 
     function fetchContacts(context: Context, query: string, dispatch: Dispatch) {
-      dispatch({ event: Event.FetchContactsStarted })
+      dispatch({ ev: Event.FetchContactsStarted })
       context.log(`Calling fetch-contact API for query: ${query}`)
       context
         .api(
@@ -399,16 +397,16 @@ export namespace Core {
         )
         .then(
           (contacts: CiviContact[]) => {
-            dispatch({ event: Event.FetchedContacts, contacts: contacts })
+            dispatch({ ev: Event.FetchedContacts, contacts: contacts })
           },
           (failure: Error) => {
-            dispatch({ event: Event.FetchContactsFailed, failure: failure })
+            dispatch({ ev: Event.FetchContactsFailed, failure: failure })
           },
         )
     }
 
     function clearResults(dispatch: Dispatch) {
-      dispatch({ event: Event.FetchedContacts, contacts: undefined })
+      dispatch({ ev: Event.FetchedContacts, contacts: undefined })
     }
   }
 }
