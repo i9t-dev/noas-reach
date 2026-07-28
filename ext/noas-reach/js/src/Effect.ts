@@ -26,7 +26,7 @@ export function execute<MsgT>(
       command.onSuccessOf,
       command.onFailureOf,
       dispatch)
-    case Operation.Log: return log(command.message)
+    case Operation.Log: return log(context, command.message)
   }
 }
 
