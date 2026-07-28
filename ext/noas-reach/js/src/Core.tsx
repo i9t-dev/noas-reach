@@ -1,4 +1,5 @@
 import React from 'react'
+import { CiviContact, Command, Operation } from './Command'
 
 export namespace Core {
 
@@ -22,7 +23,7 @@ export namespace Core {
     contacts: undefined,
   }
 
-  type Dispatch = (event: Message) => void
+  export type Dispatch = (event: Message) => void
 
   export type Change = {
     model: Model
@@ -201,7 +202,7 @@ export namespace Core {
 
   //-- Update --//
 
-  enum Event {
+  export enum Event {
     QueryChanged,
     SearchClicked,
     FetchContactsStarted,
@@ -219,16 +220,6 @@ export namespace Core {
     | { ev: Event.FetchContactsFailed, failure: Error }
     | { ev: Event.DetailClicked, contact: Contact }
     | { ev: Event.Reset }
-
-  interface CiviContact {
-    contact_type: string
-    display_name: string
-    first_name: string | undefined
-    last_name: string | undefined
-    organization_name: string | undefined
-    created_date: Date
-    modified_date: Date
-  }
 
   export namespace Update {
 
@@ -334,86 +325,6 @@ export namespace Core {
         },
         command: { op: Operation.NoOp },
       }
-    }
-  }
-
-  //-- Commands --//
-
-  export enum Operation {
-    NoOp,
-    Log,
-    FetchContacts,
-  }
-
-  export type Command =
-    | { op: Operation.NoOp }
-    | { op: Operation.Log, message: string }
-    | { op: Operation.FetchContacts, query: string }
-
-  export namespace Effect {
-
-    export type Context = {
-      api: (
-        endpoint: string,
-        method: string,
-        options: {
-          limit: number,
-          where: [[
-            fieldName: string,
-            operator: string,
-            fieldValue: string
-          ]]
-        }
-      ) => Promise<CiviContact[]>
-      log: (message: string) => void
-    }
-
-    export function handler(context: Context, dispatch: Dispatch) {
-      return (command: Command) => {
-        switch (command.op) {
-          case Operation.NoOp: /* No op */ break
-          case Operation.FetchContacts:
-            return fetchContacts(
-              context,
-              command.query,
-              () => { dispatch({ ev: Event.FetchContactsStarted }) },
-              (contacts: CiviContact[]) => {
-                dispatch({ ev: Event.FetchedContacts, contacts: contacts })
-              },
-              (failure: Error) => {
-                dispatch({ ev: Event.FetchContactsFailed, failure: failure })
-              },
-            )
-          case Operation.Log:
-            return log(context, command.message)
-        }
-      }
-    }
-
-    function log(context: Context, message: string) {
-      const date = new Date().toISOString()
-      context.log(`[${date}] ${message}`)
-    }
-
-    function fetchContacts(
-      context: Context,
-      query: string,
-      onStart: () => void,
-      onSuccess: (contacts: CiviContact[]) => void,
-      onFailure: (error: Error) => void,
-    ) {
-      onStart()
-      context.log(`Calling fetch-contact API for query: ${query}`)
-      context
-        .api(
-          'Contact',
-          'get',
-          { limit: 25, where: [["display_name", "CONTAINS", query]], }
-        )
-        .then(
-          (contacts: CiviContact[]) => { onSuccess(contacts) },
-          (failure: Error) => { onFailure(failure) },
-        )
     }
   }
 }
