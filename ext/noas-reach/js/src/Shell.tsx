@@ -13,6 +13,17 @@ declare global {
   }
 }
 
+const context = {
+  log: console.log,
+  callCivi: (
+    endpoint: string,
+    method: string,
+    options: ({
+      limit: number,
+      where: [[fieldName: string, operator: string, fieldValue: string]]
+    })) => window.CRM.api4(endpoint, method, options)
+}
+
 const Shell = () => {
 
   const [model, setModel] = useState<Core.Model>(Core.initialModel)
@@ -24,7 +35,6 @@ const Shell = () => {
       console.log(`Setting model to ${JSON.stringify(change.model)}`)
       setModel(change.model)
     }
-    const context = { log: console.log, CRM: window.CRM }
     execute(context, change.command, dispatch)
   }
 

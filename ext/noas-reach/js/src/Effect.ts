@@ -1,20 +1,14 @@
 import { CiviContact, Command, Operation, Dispatch } from './Command'
 
 export interface Context {
-  CRM: {
-    api4: (
-      endpoint: string,
-      method: string,
-      options: {
-        limit: number,
-        where: [[
-          fieldName: string,
-          operator: string,
-          fieldValue: string
-        ]]
-      }
-    ) => Promise<CiviContact[]>
-  },
+  callCivi: (
+    endpoint: 'Contact',
+    method: 'get',
+    options: {
+      limit: number,
+      where: [[fieldName: string, operator: string, fieldValue: string]]
+    }
+  ) => Promise<CiviContact[]>,
   log: (text: string) => void,
 }
 
@@ -51,16 +45,13 @@ function fetchContacts<MsgT>(
 ) {
   dispatch(onStart)
   context.log(`Calling fetch-contact API for query: ${query}`)
-  context.CRM
-    .api4(
-      'Contact',
-      'get',
-      { limit: 25, where: [["display_name", "CONTAINS", query]], }
-    )
+  context.callCivi(
+    'Contact',
+    'get',
+    { limit: 25, where: [["display_name", "CONTAINS", query]] }
+  )
     .then(
-      (remoteContacts: CiviContact[]) =>
-        dispatch(onSuccess(remoteContacts)),
-      (failure: Error) =>
-        dispatch(onFailure(failure)),
+      (remoteContacts) => dispatch(onSuccess(remoteContacts)),
+      (failure) => dispatch(onFailure(failure)),
     )
 }

@@ -310,7 +310,7 @@ export namespace Core {
         model: model,
         command: {
           op: Operation.Log,
-          message: `Failed fetching contacts: ${failure}`
+          message: `Failed fetching contacts: ${JSON.stringify(failure)}`
         },
       }
     }
