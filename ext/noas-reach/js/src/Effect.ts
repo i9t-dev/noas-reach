@@ -30,9 +30,9 @@ export function execute<MsgT>(
   }
 }
 
-function log(message: string) {
+function log(context: Context, message: string) {
   const date = new Date().toISOString()
-  console.log(`[${date}] ${message}`)
+  context.log(`[${date}] ${message}`)
 }
 
 function fetchContacts<MsgT>(
