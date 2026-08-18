@@ -9,7 +9,10 @@ enum Status {
 type Cst = any
 type Ast = any
 
-export type CiviQuery = any
+export type CiviQuery = {
+  limit: number,
+  where: [[fieldName: string, operator: string, fieldValue: string]]
+}
 
 function init(query: String): [Status.Initialized, String] {
     return [Status.Initialized, query]
@@ -30,7 +33,7 @@ function analyze(_: [Status.Parsed, value: any]): [Status.Analyzed, Ast] {
 }
 
 function convert(
-    _: [Status.Analyzed, value: Ast]
+    _: [Status.Analyzed, value: CiviQuery]
 ): [Status.Converted, CiviQuery] {
     throw Error("Not implemented")
 }
@@ -40,5 +43,6 @@ export function toCivi(query: String): CiviQuery {
     const tokenized = tokenize(initialized)
     const parsed = parse(tokenized)
     const analyzed = analyze(parsed)
-    return convert(analyzed)
+    const [ _, result ] = convert(analyzed)
+    return result
 }

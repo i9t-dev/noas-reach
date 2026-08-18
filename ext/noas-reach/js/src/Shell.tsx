@@ -3,6 +3,7 @@ import { useState } from 'react'
 import ReactDOM from 'react-dom/client'
 import { Core } from './Core'
 import { execute } from './Effect'
+import { CiviQuery } from './Query'
 
 //-- Runtime --//
 
@@ -18,10 +19,7 @@ const context = {
   callCivi: (
     endpoint: string,
     method: string,
-    options: ({
-      limit: number,
-      where: [[fieldName: string, operator: string, fieldValue: string]]
-    })) => window.CRM.api4(endpoint, method, options)
+    options: (CiviQuery)) => window.CRM.api4(endpoint, method, options)
 }
 
 const Shell = () => {
