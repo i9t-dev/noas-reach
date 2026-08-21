@@ -32,14 +32,14 @@ export namespace Core {
 
   export namespace View {
 
-    export function of(model: Model, dispatch: Dispatch) {
+    export function of(model: Model, dispatch: Dispatch<Message>) {
       return <div style={{ marginBottom: "2em" }} className="noas-reach">
         {form(model.query, dispatch)}
         {results(model.contacts, dispatch)}
       </div>
     }
 
-    function form(query: string, dispatch: Dispatch) {
+    function form(query: string, dispatch: Dispatch<Message>) {
       return (
         <fieldset>
           <legend>Find contacts</legend>
@@ -136,7 +136,7 @@ export namespace Core {
       </tr>
     }
 
-    function contactRows(contacts: Contact[], dispatch: Dispatch) {
+    function contactRows(contacts: Contact[], dispatch: Dispatch<Message>) {
       return <>
         {contacts.map(
           (c, i) => (
