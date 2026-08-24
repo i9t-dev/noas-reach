@@ -13,26 +13,15 @@ enum Status {
     Converted,
 }
 
-const Key = createToken({ name: "Key", pattern: /[A-Za-z][A-Za-z0-9\-_]*/ })
-const Colon = createToken({ name: "Colon", pattern: /:/ })
-const Unquoted = createToken({ name: "Value", pattern: /[A-Za-z][A-Za-z0-9\-_]*/ })
-const SingleQuote = createToken({ name: "SingleQuote", pattern: /'/ })
-const DoubleQuote = createToken({ name: "DoubleQuote", pattern: /"/ })
-const Text = createToken({ name: "Text", pattern: /[^'"]*/ })
-const Space = createToken({
-    name: "Space",
-    pattern: /\s+/,
-    group: Lexer.SKIPPED,
-})
-
 const allTokens = [
-    Space,
-    Key,
-    Colon,
-    Unquoted,
-    SingleQuote,
-    DoubleQuote,
-    Text,
+    createToken({ name: "Space", pattern: /\s/ }),
+    createToken({ name: "Colon", pattern: /:/ }),
+    createToken({ name: "Quote", pattern: /['"]/ }),
+    createToken({
+        name: "Identifier",
+        pattern: /[A-Za-z][A-Za-z0-9\-_]*(?=:)/,
+    }),
+    createToken({ name: "Word", pattern: /[^'"\s]+/ }),
 ]
 
 const lexer = new Lexer(allTokens)
@@ -68,7 +57,7 @@ function convert(
     throw Error("Not implemented")
 }
 
-export default function(query: string): CiviQuery {
+export default function (query: string): CiviQuery {
     console.log("Initializing...")
     const initialized = init(query)
     console.log(`Initialized: ${JSON.stringify(initialized, null, 2)}`)
@@ -76,19 +65,19 @@ export default function(query: string): CiviQuery {
     console.log("Tokenizing...")
     const tokenized = tokenize(initialized)
     console.log(`Tokenized: ${JSON.stringify(tokenized, null, 2)}`)
-    
+
     console.log("Parsing...")
     const parsed = parse(tokenized)
     console.log(`Parsed: ${JSON.stringify(parsed, null, 2)}`)
-    
+
     console.log("Analyzing...")
     const analyzed = analyze(parsed)
     console.log(`Analyzed: ${JSON.stringify(analyzed, null, 2)}`)
-    
+
     console.log("Converting...")
     const converted = convert(analyzed)
     console.log(`Converted: ${JSON.stringify(converted, null, 2)}`)
-    
+
     const [/*status*/, civiQuery] = converted
     return civiQuery
 }
