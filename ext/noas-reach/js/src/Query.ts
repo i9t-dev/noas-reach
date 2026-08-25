@@ -1,4 +1,4 @@
-import { createToken, CstNode, ILexingResult, Lexer } from "chevrotain"
+import { createToken, CstNode, CstParser, ILexingResult, Lexer } from "chevrotain"
 
 export type CiviQuery = {
     limit: number,
@@ -13,17 +13,23 @@ enum Status {
     Converted,
 }
 
-const allTokens = [
-    createToken({ name: "Space", pattern: /\s+/, group: Lexer.SKIPPED }),
-    createToken({ name: "Colon", pattern: /:/, group: Lexer.SKIPPED }),
-    createToken({ name: "Text", pattern: /["'][^"']*["']/ }),
-    createToken({ name: "Regex", pattern: /\/[^\/]*\// }),
-    createToken({
-        name: "Identifier",
-        pattern: /[A-Za-z][A-Za-z0-9\-_]*(?=:)/,
-    }),
-    createToken({ name: "Word", pattern: /[^'"\/\s]+/ }),
-]
+const Space = createToken({
+    name: "Space",
+    pattern: /\s+/,
+    group: Lexer.SKIPPED,
+})
+
+const Identifier = createToken({
+    name: "Identifier",
+    pattern: /[A-Za-z][A-Za-z0-9\-_]*(?=:)/,
+})
+
+const Colon = createToken({ name: "Colon", pattern: /:/, group: Lexer.SKIPPED })
+const Text = createToken({ name: "Text", pattern: /["'][^"']*["']/ })
+const Regex = createToken({ name: "Regex", pattern: /\/[^\/]*\// })
+const Word = createToken({ name: "Word", pattern: /[^'"\/\s]+/ })
+
+const allTokens = [Space, Colon, Text, Regex, Identifier, Word]
 
 const lexer = new Lexer(allTokens)
 
@@ -47,10 +53,41 @@ function tokenize(
     return [Status.Tokenized, lexer.tokenize(initialQuery)]
 }
 
+type CstNodeSupplier = () => CstNode
+
+class QueryParser extends CstParser {
+    constructor() {
+        super(allTokens)
+        this.RULE("query", () => {
+            this.AT_LEAST_ONE({
+                DEF: () => {
+                    this.SUBRULE(this.clause)
+                }
+            })
+        })
+        this.RULE("clause", () => {
+            this.CONSUME(Identifier)
+            this.OR([
+                { ALT: () => this.CONSUME(Word) },
+                { ALT: () => this.CONSUME(Text) },
+                { ALT: () => this.CONSUME(Regex) },
+            ])
+        })
+        this.performSelfAnalysis()
+    }
+
+    readonly query!: CstNodeSupplier
+    readonly clause!: CstNodeSupplier
+}
+
+const parser = new QueryParser()
+
 function parse(
-    [_status, _lexedQuery]: [Status.Tokenized, ILexingResult]
+    [_status, lexedQuery]: [Status.Tokenized, ILexingResult]
 ): [Status.Parsed, Cst] {
-    throw Error("Not implemented")
+    parser.input = lexedQuery.tokens
+    const cst = parser.query()
+    return [Status.Parsed, cst]
 }
 
 function analyze(
