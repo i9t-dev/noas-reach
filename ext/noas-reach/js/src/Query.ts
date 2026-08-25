@@ -1,4 +1,4 @@
-import { createToken, Lexer } from "chevrotain"
+import { createToken, CstNode, ILexingResult, Lexer } from "chevrotain"
 
 export type CiviQuery = {
     limit: number,
@@ -14,20 +14,28 @@ enum Status {
 }
 
 const allTokens = [
-    createToken({ name: "Space", pattern: /\s/ }),
-    createToken({ name: "Colon", pattern: /:/ }),
-    createToken({ name: "Quote", pattern: /['"]/ }),
+    createToken({ name: "Space", pattern: /\s+/, group: Lexer.SKIPPED }),
+    createToken({ name: "Colon", pattern: /:/, group: Lexer.SKIPPED }),
+    createToken({ name: "Text", pattern: /["'][^"']*["']/ }),
+    createToken({ name: "Regex", pattern: /\/[^\/]*\// }),
     createToken({
         name: "Identifier",
         pattern: /[A-Za-z][A-Za-z0-9\-_]*(?=:)/,
     }),
-    createToken({ name: "Word", pattern: /[^'"\s]+/ }),
+    createToken({ name: "Word", pattern: /[^'"\/\s]+/ }),
 ]
 
 const lexer = new Lexer(allTokens)
 
-type Cst = any
-type Ast = any
+type Cst = CstNode
+type Ast = {
+    query: {
+        clauses: [
+            key: string,
+            value: any,
+        ]
+    }
+}
 
 function init(query: string): [Status.Initialized, string] {
     return [Status.Initialized, query]
@@ -35,24 +43,24 @@ function init(query: string): [Status.Initialized, string] {
 
 function tokenize(
     [_status, initialQuery]: [Status.Initialized, string]
-): [Status.Tokenized, any] {
+): [Status.Tokenized, ILexingResult] {
     return [Status.Tokenized, lexer.tokenize(initialQuery)]
 }
 
 function parse(
-    [_status, _lexedQuery]: [Status.Tokenized, string]
+    [_status, _lexedQuery]: [Status.Tokenized, ILexingResult]
 ): [Status.Parsed, Cst] {
     throw Error("Not implemented")
 }
 
 function analyze(
-    [_status, _parsedQuery]: [Status.Parsed, value: any]
+    [_status, _parsedQuery]: [Status.Parsed, value: Cst]
 ): [Status.Analyzed, Ast] {
     throw Error("Not implemented")
 }
 
 function convert(
-    [_status, _convertedQuery]: [Status.Analyzed, CiviQuery]
+    [_status, _convertedQuery]: [Status.Analyzed, Ast]
 ): [Status.Converted, CiviQuery] {
     throw Error("Not implemented")
 }
@@ -78,6 +86,6 @@ export default function (query: string): CiviQuery {
     const converted = convert(analyzed)
     console.log(`Converted: ${JSON.stringify(converted, null, 2)}`)
 
-    const [/*status*/, civiQuery] = converted
+    const [_conversionStatus, civiQuery] = converted
     return civiQuery
 }
