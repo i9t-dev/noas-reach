@@ -1,8 +1,9 @@
 import { createToken, CstNode, CstParser, ILexingResult, Lexer } from "chevrotain"
 
-export type CiviQuery = {
-    limit: number,
-    where: [[fieldName: string, operator: string, fieldValue: string]]
+export namespace Civi {
+    export type Operator = "=" | "REGEXP"
+    export type Clause = [string, Operator, string]
+    export type Query = { limit: number, where: Clause[] }
 }
 
 enum Status {
@@ -115,21 +116,21 @@ class CustomCstVisitor extends BaseCstVisitor {
 
     clause(ctx: any): Ast.Clause {
         return ctx.Text ? {
-            key: ctx.Identifier.image,
+            key: ctx.Identifier[0].image,
             type: "text",
             value: (ctx.Text[0].image as string)
                 .replace(/^["'](.*)["']$/, "$1"),
         } : ctx.Word ? {
-            key: ctx.Identifier.image,
+            key: ctx.Identifier[0].image,
             type: "text",
             value: ctx.Word[0].image,
         } : ctx.Regex ? {
-            key: ctx.Identifier.image,
+            key: ctx.Identifier[0].image,
             type: "regex",
             value: (ctx.Regex[0].image as string)
                 .replace(/^\/(.*)\/$/, "$1"),
         } : {
-            key: ctx.Identifier.image,
+            key: ctx.Identifier[0].image,
             type: "unknown",
             value: "TBD",
         }
@@ -146,12 +147,32 @@ function analyze(
 }
 
 function convert(
-    [_status, _convertedQuery]: [Status.Analyzed, Ast.Query]
-): [Status.Converted, CiviQuery] {
-    throw Error("Not implemented")
+    [_status, ast]: [Status.Analyzed, Ast.Query]
+): [Status.Converted, Civi.Query] {
+    const civiWhereClauses = ast.query.clauses
+        .filter((c) => c.type != "unknown")
+        .map((c) => {
+            const operators = {
+                text: "=",
+                regex: "REGEXP",
+                unknown: undefined,
+            }
+            const op = operators[c.type]
+            if (op) {
+                return [c.key, op, c.value] as [string, Civi.Operator, string]
+            } else {
+                throw Error(`Query clause type unknown: ${c.type}`)
+            }
+
+        })
+    const result = {
+        limit: 25,
+        where: civiWhereClauses
+    }
+    return [Status.Converted, result]
 }
 
-export default function (query: string): CiviQuery {
+export default function (query: string): Civi.Query {
     console.log("Initializing...")
     const initialized = init(query)
     console.log(`Initialized: ${JSON.stringify(initialized, null, 2)}`)
