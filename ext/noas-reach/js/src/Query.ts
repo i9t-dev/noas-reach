@@ -34,14 +34,6 @@ const allTokens = [Space, Colon, Text, Regex, Identifier, Word]
 const lexer = new Lexer(allTokens)
 
 type Cst = CstNode
-type Ast = {
-    query: {
-        clauses: [
-            key: string,
-            value: any,
-        ]
-    }
-}
 
 function init(query: string): [Status.Initialized, string] {
     return [Status.Initialized, query]
@@ -90,14 +82,71 @@ function parse(
     return [Status.Parsed, cst]
 }
 
+const BaseCstVisitor = parser.getBaseCstVisitorConstructor()
+
+namespace Ast {
+    export type Clause = {
+        key: string,
+        type: "text" | "regex" | "unknown",
+        value: string,
+    }
+
+    export type Query = {
+        query: {
+            clauses: Clause[]
+        }
+    }
+}
+
+class CustomCstVisitor extends BaseCstVisitor {
+    constructor() {
+        super()
+        this.validateVisitor()
+    }
+
+    query(ctx: any): Ast.Query {
+        const clauses = ctx.clause
+        return {
+            query: {
+                clauses: clauses.map((c: any) => this.visit(c))
+            }
+        }
+    }
+
+    clause(ctx: any): Ast.Clause {
+        return ctx.Text ? {
+            key: ctx.Identifier.image,
+            type: "text",
+            value: (ctx.Text[0].image as string)
+                .replace(/^["'](.*)["']$/, "$1"),
+        } : ctx.Word ? {
+            key: ctx.Identifier.image,
+            type: "text",
+            value: ctx.Word[0].image,
+        } : ctx.Regex ? {
+            key: ctx.Identifier.image,
+            type: "regex",
+            value: (ctx.Regex[0].image as string)
+                .replace(/^\/(.*)\/$/, "$1"),
+        } : {
+            key: ctx.Identifier.image,
+            type: "unknown",
+            value: "TBD",
+        }
+    }
+}
+
+const cstVisitor = new CustomCstVisitor()
+
 function analyze(
-    [_status, _parsedQuery]: [Status.Parsed, value: Cst]
-): [Status.Analyzed, Ast] {
-    throw Error("Not implemented")
+    [_status, parsedQuery]: [Status.Parsed, value: Cst]
+): [Status.Analyzed, Ast.Query] {
+    const ast = cstVisitor.visit(parsedQuery)
+    return [Status.Analyzed, ast]
 }
 
 function convert(
-    [_status, _convertedQuery]: [Status.Analyzed, Ast]
+    [_status, _convertedQuery]: [Status.Analyzed, Ast.Query]
 ): [Status.Converted, CiviQuery] {
     throw Error("Not implemented")
 }
