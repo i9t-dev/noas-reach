@@ -1,13 +1,12 @@
 import { CiviContact, Command, Operation, Dispatch } from './Command'
+import Query from './Query'
+import { Civi } from './Query'
 
 export interface Context {
   callCivi: (
     endpoint: 'Contact',
     method: 'get',
-    options: {
-      limit: number,
-      where: [[fieldName: string, operator: string, fieldValue: string]]
-    }
+    options: Civi.Query
   ) => Promise<CiviContact[]>,
   log: (text: string) => void,
 }
@@ -44,12 +43,11 @@ function fetchContacts<MsgT>(
   dispatch: Dispatch<MsgT>,
 ) {
   dispatch(onStart)
-  context.log(`Calling fetch-contact API for query: ${query}`)
-  context.callCivi(
-    'Contact',
-    'get',
-    { limit: 25, where: [["display_name", "CONTAINS", query]] }
-  )
+  context.log(`Parsing query: ${query}`)
+  const civiQuery = Query(query)
+  context.log(`Parsed query to: ${JSON.stringify(civiQuery, null, 2)}`)
+  context.log(`Fetching contacts for parsed query`)
+  context.callCivi('Contact', 'get', civiQuery)
     .then(
       (remoteContacts) => dispatch(onSuccess(remoteContacts)),
       (failure) => dispatch(onFailure(failure)),
