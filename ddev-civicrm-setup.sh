@@ -12,7 +12,7 @@ ddev composer require civicrm/cli-tools --no-scripts
 ddev exec cv core:install \
     --cms-base-url='$DDEV_PRIMARY_URL' \
     --db=mysql://db:db@db/db \
-    -m loadGenerated=0 \
+    -m loadGenerated=1 \
     -m extras.adminUser=admin \
     -m extras.adminPass=admin \
     -m extras.adminEmail=root@localhost
