@@ -60,20 +60,31 @@
 
     <div>
         <blockquote>
-            Noas-reach is a standalone app to manage professional relationships
+            Noas-reach is a full-text CiviCRM search extension.
         </blockquote>
 
         Features (✅: implemented, 🚧: work in progress, 🔮: planned):
 
         <ul>
-            <li>🚧 Provide all the features of a plain CiviCRM standalone instance regarding contact, relationship and event management</li>
-            <li>🔮 Install as a <a href="https://civicrm.org">CiviCRM</a> extension (<code>noas-reach</code>)</li>
-            <li>🔮 Show a graph view of the relationships between contacts</li>
-            <li>🔮 Find contacts via a dynamic search form</li>
-            <li>🔮 Present search results as a table</li>
+            <li>✅ Search CiviCRM contacts</li>
+            <li>✅ Show entities corresponding to a search query</li>
+            <li>🚧 Handle a subset of the search syntax of Apache Lucene, including:
+                <ul>
+                    <li>Full-text search: <code>Bob Smith</code> searches for "Bob Smith" through all CiviCRM text fields</li>
+                    <li>Unquoted terms: <code>first_name:Bob</code></li>
+                    <li>Quoted phrases: <code>display_name:"Bob Smith"</code></li>
+                    <li>Regular expressions: <code>email:/.*smith@gmail\.com$/</code></li>
+                    <li>Implicit logical operators: <code>first_name:Bob first_name:Alice last_name:Smith</code>
+                        <br>⇒ First name is either Bob <em>or</em> Alice <em>and</em> last name is Smith
+                    </li>
+                    <li>Exclusions: <code>-first_name:Bob</code></li>
+                    <li>Match-all clause: <code>*:*</code> shows all entities</li>
+                </ul>
+            </li>
+            <li>🚧 Find entities via a dynamic search form</li>
+            <li>🚧 Present search results as a table</li>
+            <li>🔮 Search through all CRM entities: contacts, donations, memberships, events, etc.</li>
             <li>🔮 Perform advanced view operations: filtering, ordering, grouping</li>
-            <li>🔮 Install as a standalone server-less desktop application</li>
-            <li>🔮 Install as a mobile app</li>
         </ul>
     </div>
 
