@@ -1,22 +1,22 @@
 <?xml version="1.0"?>
 <extension key="noas-reach" type="module">
   <file>noas_reach</file>
-  <name>noas-reach</name>
-  <description>FIXME</description>
+  <name>Noas-reach</name>
+  <description>A full-text search extension for CiviCRM entities</description>
   <license>AGPL-3.0</license>
   <authors>
     <author>
-      <name>DDEV User</name>
-      <email>nobody@example.com</email>
+      <name>Christophe Pelé</name>
+      <email>cp@i9t.fr</email>
       <role>Maintainer</role>
     </author>
   </authors>
   <urls>
-    <url desc="Main Extension Page">https://FIXME</url>
-    <url desc="Documentation">https://FIXME</url>
-    <url desc="Support">https://FIXME</url>
+    <url desc="Main Extension Page">https://i9t-dev.github.io/noas-reach</url>
+    <url desc="Documentation">https://github.com/i9t-dev/noas-reach/blob/main/README.md</url>
+    <url desc="Support">https://github.com/i9t-dev/noas-reach/issues</url>
     <url desc="Licensing">https://www.gnu.org/licenses/agpl-3.0.html</url>
-    <url desc="App Page">https://noas-reach.ddev.site/civicrm/app</url>
+    <url desc="App Page">/civicrm/app</url>
   </urls>
   <releaseDate>2026-07-11</releaseDate>
   <version>1.0.0</version>
@@ -37,7 +37,7 @@
     <comments>Listed versions. For example, specify both "4" and "5".</comments>
     <ver>5</ver>
   </smarty_compatibility>
-  <comments>This is a new, undeveloped module</comments>
+  <!-- <comments>TBD</comments> -->
   <classloader>
     <psr0 prefix="CRM_" path="."/>
     <psr4 prefix="Civi\" path="Civi"/>
