@@ -33,10 +33,15 @@ export namespace Core {
   export namespace View {
 
     export function of(model: Model, dispatch: Dispatch<Message>) {
-      return <div style={{ marginBottom: "2em" }} className="noas-reach">
-        {form(model.query, dispatch)}
-        {results(model.contacts, dispatch)}
-      </div>
+      return <>
+        <style>
+          {`li { list-style: inside }`}
+        </style>
+        <div style={{ marginBottom: "2em" }} className="noas-reach">
+          {form(model.query, dispatch)}
+          {results(model.contacts, dispatch)}
+        </div>
+      </>
     }
 
     function form(query: string, dispatch: Dispatch<Message>) {
@@ -99,7 +104,7 @@ export namespace Core {
 
     function results(contacts: Contact[] | undefined, dispatch: Dispatch<Message>) {
       if (contacts == undefined) {
-        return helpBlock()
+        return helpBlock(dispatch)
       } else {
         return resultsFieldset(contacts, dispatch)
       }
@@ -157,7 +162,7 @@ export namespace Core {
       </>
     }
 
-    function helpBlock() {
+    function helpBlock(dispatch: Dispatch<Message>) {
       return <div style={{ width: "50em", margin: 'auto' }}>
         <p style={{ textAlign: 'center' }}>
           Please fill in the search form and press the search button.
@@ -166,35 +171,68 @@ export namespace Core {
           background: "lightgray",
           padding: '1em',
         }}>
-          <p>The query takes the following form: </p>
-          <p><code>[text] [option1:value1] [option2:value2] [...]</code></p>
-          Available options:
-          <ul>
-            <li>
-              <code>[pattern]</code>: Match any contact property ({globHelpLink()})
-            </li>
-            <li>
-              <code>name:&lt;pattern&gt;</code>: Match contacts by name
-              ({globHelpLink()})
-            </li>
-            <li>
-              <code>email:&lt;pattern&gt;</code>: Match contacts by email
-              ({globHelpLink()})
-            </li>
-            <li>
-              <code>type:&lt;text&gt;</code>: Specify a type of contact (either "org", "person" or "all")
-            </li>
-          </ul>
+          <p>Example query:</p>
+          <p>
+            <code>word1 word2 field1:value1a field1:value1b field2:value2</code>
+          </p>
+          <p>
+            Query structure:
+            <ul>
+              <li>A query consists of several <em>clauses</em></li>
+              <li>Clauses are separated with spaces</li>
+              <li>Specific <em>fields</em> can be given with the form <code>field:expression</code></li>
+              <li>The <em>expression</em> allows to match a certain field to a given value (more info below)</li>
+              <li>The <em>default field</em> clause (here, <code>word1 word2</code>) matches all text fields</li>
+            </ul>
+          </p>
+          <p>
+            Expressions (Press the links to try):
+            <ul>
+              <li>
+                <code>first_name:Bob</code>: <a
+                  href="#"
+                  onClick={() => {
+                    dispatch({ ev: Event.QueryChanged, query: "first_name:Bob" })
+                  }
+                  }>First name contains "Bob"</a>.
+              </li>
+              <li>
+                <code>display_name:"Bob Adams"</code>: <a
+                  href="#"
+                  onClick={() => {
+                    dispatch({
+                      ev: Event.QueryChanged,
+                      query: 'display_name:"Bob Adams Jr."',
+                    })
+                  }
+                  }>Display name exactly equals "Bob Adams"</a>.
+              </li>
+              <li>
+                <code>display_name:"ad.*fam"</code>: <a
+                  href="#"
+                  onClick={() => {
+                    dispatch({
+                      ev: Event.QueryChanged,
+                      query: 'display_name:/ad.*fam/',
+                    })
+                  }
+                  }>Display name contains "ad" and "fam" with any text in-between</a>.
+              </li>
+              <li>
+                <code>*:*</code> (match-all): <a
+                  href="#"
+                  onClick={() => {
+                    dispatch({
+                      ev: Event.QueryChanged,
+                      query: '*:*',
+                    })
+                  }
+                  }>all entities</a>.
+              </li>
+            </ul>
+          </p>
         </div>
       </div>
-    }
-
-    function globHelpLink() {
-      return <a
-        href="https://en.wikipedia.org/wiki/Glob_(programming)"
-        target="help-target">
-        glob pattern
-      </a>
     }
   }
 
