@@ -88,7 +88,7 @@ const BaseCstVisitor = parser.getBaseCstVisitorConstructor()
 namespace Ast {
     export type Clause = {
         key: string,
-        type: "text" | "regex" | "unknown",
+        type: "text" | "word" | "regex" | "unknown",
         value: string,
     }
 
@@ -122,7 +122,7 @@ class CustomCstVisitor extends BaseCstVisitor {
                 .replace(/^["'](.*)["']$/, "$1"),
         } : ctx.Word ? {
             key: ctx.Identifier[0].image,
-            type: "text",
+            type: "word",
             value: ctx.Word[0].image,
         } : ctx.Regex ? {
             key: ctx.Identifier[0].image,
@@ -154,6 +154,7 @@ function convert(
         .map((c) => {
             const operators = {
                 text: "=",
+                word: "CONTAINS",
                 regex: "REGEXP",
                 unknown: undefined,
             }

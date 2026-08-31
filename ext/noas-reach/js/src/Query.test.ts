@@ -12,7 +12,7 @@ describe("Query", () => {
             expect(result).toEqual({
                 limit: 25,
                 where: [
-                    ["key1", "=", "val1a"],
+                    ["key1", "CONTAINS", "val1a"],
                     ["key2", "=", "val2a val2b val2c"],
                     ["key3", "REGEXP", "val3a.*"],
                 ]
