@@ -22,4 +22,14 @@ describe("Query", () => {
             throw error
         }
     })
+    it("throws error for invalid word", () => {
+        try {
+            query('key1:')
+            throw Error("Exception was expected")
+        } catch (throwable) {
+            const error = throwable as Error
+            console.log(error)
+            expect(error.message).toEqual("NoViableAltException: At character 4, after [key1]")
+        }
+    })
 })

@@ -1,4 +1,4 @@
-import { createToken, CstNode, CstParser, ILexingResult, Lexer } from "chevrotain"
+import { createToken, CstNode, CstParser, EarlyExitException, ILexingResult, IRecognitionException, Lexer, MismatchedTokenException, NoViableAltException } from "chevrotain"
 
 export namespace Civi {
     export type Operator = "=" | "REGEXP"
@@ -80,7 +80,29 @@ function parse(
 ): [Status.Parsed, Cst] {
     parser.input = lexedQuery.tokens
     const cst = parser.query()
-    return [Status.Parsed, cst]
+    const errors = parser.errors
+    if (errors.length > 0) {
+        throw Error(parseErrors(errors))
+    } else {
+        return [Status.Parsed, cst]
+    }
+}
+
+function parseErrors(errors: IRecognitionException[]) {
+    console.error(`Error parsing query:`)
+    console.error(JSON.stringify(errors, null, 2))
+    const msg = errors
+        .map((e) => {
+            if (e instanceof NoViableAltException ||
+                e instanceof EarlyExitException ||
+                e instanceof MismatchedTokenException) {
+                return `${e.name}: At character ${e.previousToken.endColumn}, after [${e.previousToken.image}]`
+            } else {
+                return `${e.name}: ${e.message}`
+            }
+        })
+        .join("\n")
+    return msg
 }
 
 const BaseCstVisitor = parser.getBaseCstVisitorConstructor()
