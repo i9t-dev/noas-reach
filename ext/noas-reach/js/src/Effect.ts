@@ -44,12 +44,17 @@ function fetchContacts<MsgT>(
 ) {
   dispatch(onStart)
   context.log(`Parsing query: ${query}`)
-  const civiQuery = Query(query)
-  context.log(`Parsed query to: ${JSON.stringify(civiQuery, null, 2)}`)
-  context.log(`Fetching contacts for parsed query`)
-  context.callCivi('Contact', 'get', civiQuery)
-    .then(
-      (remoteContacts) => dispatch(onSuccess(remoteContacts)),
-      (failure) => dispatch(onFailure(failure)),
-    )
+  try {
+    const civiQuery = Query(query)
+    context.log(`Parsed query to: ${JSON.stringify(civiQuery, null, 2)}`)
+    context.log(`Fetching contacts for parsed query`)
+    context.callCivi('Contact', 'get', civiQuery)
+      .then(
+        (remoteContacts) => dispatch(onSuccess(remoteContacts)),
+        (failure) => dispatch(onFailure(failure)),
+      )
+  } catch (caught) {
+    const error = caught as Error
+    dispatch(onFailure(error))
+  }
 }
