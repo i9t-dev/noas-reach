@@ -121,9 +121,11 @@ export namespace Core {
         margin: 'auto',
         marginBottom: '1em',
         textAlign: 'center',
+        backgroundColor: 'mistyrose',
+        padding: '1em',
       }}>
-        <p style={{ color: 'red' }}>Invalid query ({contacts.message}).</p>
-        <p style={{ color: 'red' }}>Please try again.</p>
+        <p>Invalid query ({contacts.message}).</p>
+        <p>Please try again.</p>
       </div>
     }
 
@@ -301,7 +303,8 @@ export namespace Core {
       return {
         model: {
           ...model,
-          query: query
+          query: query,
+          contacts: undefined,
         },
         command: { op: Operation.NoOp },
       }
