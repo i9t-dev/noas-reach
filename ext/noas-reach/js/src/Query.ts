@@ -93,10 +93,11 @@ function parseErrors(errors: IRecognitionException[]) {
   console.error(JSON.stringify(errors, null, 2))
   const msg = errors
     .map((e) => {
-      if (e instanceof NoViableAltException ||
-        e instanceof EarlyExitException ||
-        e instanceof MismatchedTokenException) {
-        return `${e.name}: At character ${e.previousToken.endColumn}, after [${e.previousToken.image}]`
+      if (
+        e instanceof NoViableAltException ||
+        e instanceof MismatchedTokenException
+      ) {
+        return `${e.name}: At character ${e.previousToken.endColumn}, after [${e.previousToken.image}] - ${e.message}`
       } else {
         return `${e.name}: ${e.message}`
       }

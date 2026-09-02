@@ -28,8 +28,9 @@ describe("Query", () => {
       throw Error("Exception was expected")
     } catch (throwable) {
       const error = throwable as Error
-      console.log(error)
-      expect(error.message).toEqual("NoViableAltException: At character 4, after [key1]")
+      expect(error.message).toMatch(
+        /NoViableAltException: At character 4, after \[key1\] - Expecting: one of these possible Token sequences:\n\s*1\.\s*\[Word\]\n\s*2\.\s*\[Text\]\n\s*3\.\s*\[Regex\]/
+      )
     }
   })
 })

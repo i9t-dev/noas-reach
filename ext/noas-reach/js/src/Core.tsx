@@ -8,7 +8,7 @@ export namespace Core {
   export type Model = {
     name: string
     query: string
-    contacts: Contact[] | undefined
+    contacts: Contact[] | Error | undefined
   }
 
   type Contact = {
@@ -102,12 +102,29 @@ export namespace Core {
         </fieldset>)
     }
 
-    function results(contacts: Contact[] | undefined, dispatch: Dispatch<Message>) {
+    function results(contacts: Contact[] | Error | undefined, dispatch: Dispatch<Message>) {
       if (contacts == undefined) {
         return helpBlock(dispatch)
+      } else if (contacts instanceof Error) {
+        return <>
+          {errorBlock(contacts, dispatch)}
+          {helpBlock(dispatch)}
+        </>
       } else {
         return resultsFieldset(contacts, dispatch)
       }
+    }
+
+    function errorBlock(contacts: Error, dispatch: Dispatch<Core.Message>) {
+      return <div style={{
+        width: "50em",
+        margin: 'auto',
+        marginBottom: '1em',
+        textAlign: 'center',
+      }}>
+        <p style={{ color: 'red' }}>Invalid query ({contacts.message}).</p>
+        <p style={{ color: 'red' }}>Please try again.</p>
+      </div>
     }
 
     function resultsFieldset(contacts: Contact[], dispatch: Dispatch<Message>) {
@@ -345,7 +362,10 @@ export namespace Core {
       failure: Error | undefined
     ): Change {
       return {
-        model: model,
+        model: {
+          ...model,
+          contacts: failure,
+        },
         command: {
           op: Operation.Log,
           message: `Failed fetching contacts: ${JSON.stringify(failure)}`
@@ -375,3 +395,4 @@ export namespace Core {
     }
   }
 }
+
