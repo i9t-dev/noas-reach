@@ -102,20 +102,20 @@ export namespace Core {
         </fieldset>)
     }
 
-    function results(contacts: Contact[] | Error | undefined, dispatch: Dispatch<Message>) {
-      if (contacts == undefined) {
+    function results(response: Contact[] | Error | undefined, dispatch: Dispatch<Message>) {
+      if (response == undefined) {
         return helpBlock(dispatch)
-      } else if (contacts instanceof Error) {
+      } else if (response instanceof Error) {
         return <>
-          {errorBlock(contacts, dispatch)}
+          {errorBlock(response, dispatch)}
           {helpBlock(dispatch)}
         </>
       } else {
-        return resultsFieldset(contacts, dispatch)
+        return resultsFieldset(response, dispatch)
       }
     }
 
-    function errorBlock(contacts: Error, dispatch: Dispatch<Core.Message>) {
+    function errorBlock(error: Error, _: Dispatch<Core.Message>) {
       return <div style={{
         width: "50em",
         margin: 'auto',
@@ -124,7 +124,8 @@ export namespace Core {
         backgroundColor: 'mistyrose',
         padding: '1em',
       }}>
-        <p>Invalid query ({contacts.message}).</p>
+        <h3>Search failed</h3>
+        <p>{error.message}</p>
         <p>Please try again.</p>
       </div>
     }

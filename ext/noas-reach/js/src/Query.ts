@@ -4,6 +4,12 @@ export namespace Civi {
   export type Operator = "=" | "REGEXP"
   export type Clause = [string, Operator, string]
   export type Query = { limit: number, where: Clause[] }
+  export type Failure = {
+    error_id: string | undefined,
+    error_code: number | undefined,
+    error_message: string | undefined,
+    status: number | undefined,
+  }
 }
 
 enum Status {

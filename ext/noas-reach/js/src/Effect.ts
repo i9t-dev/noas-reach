@@ -51,10 +51,19 @@ function fetchContacts<MsgT>(
     context.callCivi('Contact', 'get', civiQuery)
       .then(
         (remoteContacts) => dispatch(onSuccess(remoteContacts)),
-        (failure) => dispatch(onFailure(failure)),
+        (remoteFailure: Civi.Failure) => {
+          const message = `Server error (code: [${remoteFailure.error_code}], id: [${remoteFailure.error_id}], message: [${remoteFailure.error_message}], status: [${remoteFailure.status}])`
+          const error = Error(message)
+          dispatch(onFailure(error))
+        },
       )
   } catch (caught) {
     const error = caught as Error
-    dispatch(onFailure(error))
+    const clientError: Error = {
+      message: `Client error: ${error.message}`,
+      stack: error.stack,
+      name: error.name,
+    }
+    dispatch(onFailure(clientError))
   }
 }
