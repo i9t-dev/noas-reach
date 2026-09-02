@@ -3,7 +3,7 @@ import { useState } from 'react'
 import ReactDOM from 'react-dom/client'
 import { Core } from './Core'
 import { execute } from './Effect'
-import { CiviQuery } from './Query'
+import { Civi } from './Query'
 
 //-- Runtime --//
 
@@ -19,7 +19,7 @@ const context = {
   callCivi: (
     endpoint: string,
     method: string,
-    options: (CiviQuery)) => window.CRM.api4(endpoint, method, options)
+    options: (Civi.Query)) => window.CRM.api4(endpoint, method, options)
 }
 
 const Shell = () => {

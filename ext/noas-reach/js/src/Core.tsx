@@ -177,62 +177,62 @@ export namespace Core {
           </p>
           <p>
             Query structure:
-            <ul>
-              <li>A query consists of several <em>clauses</em></li>
-              <li>Clauses are separated with spaces</li>
-              <li>Specific <em>fields</em> can be given with the form <code>field:expression</code></li>
-              <li>The <em>expression</em> allows to match a certain field to a given value (more info below)</li>
-              <li>The <em>default field</em> clause (here, <code>word1 word2</code>) matches all text fields</li>
-            </ul>
           </p>
+          <ul>
+            <li>A query consists of several <em>clauses</em></li>
+            <li>Clauses are separated with spaces</li>
+            <li>Specific <em>fields</em> can be given with the form <code>field:expression</code></li>
+            <li>The <em>expression</em> allows to match a certain field to a given value (more info below)</li>
+            <li>The <em>default field</em> clause (here, <code>word1 word2</code>) matches all text fields</li>
+          </ul>
           <p>
             Expressions (Press the links to try):
-            <ul>
-              <li>
-                <code>first_name:Bob</code>: <a
-                  href="#"
-                  onClick={() => {
-                    dispatch({ ev: Event.QueryChanged, query: "first_name:Bob" })
-                  }
-                  }>First name contains "Bob"</a>.
-              </li>
-              <li>
-                <code>display_name:"Bob Adams"</code>: <a
-                  href="#"
-                  onClick={() => {
-                    dispatch({
-                      ev: Event.QueryChanged,
-                      query: 'display_name:"Bob Adams Jr."',
-                    })
-                  }
-                  }>Display name exactly equals "Bob Adams"</a>.
-              </li>
-              <li>
-                <code>display_name:"ad.*fam"</code>: <a
-                  href="#"
-                  onClick={() => {
-                    dispatch({
-                      ev: Event.QueryChanged,
-                      query: 'display_name:/ad.*fam/',
-                    })
-                  }
-                  }>Display name contains "ad" and "fam" with any text in-between</a>.
-              </li>
-              <li>
-                <code>*:*</code> (match-all): <a
-                  href="#"
-                  onClick={() => {
-                    dispatch({
-                      ev: Event.QueryChanged,
-                      query: '*:*',
-                    })
-                  }
-                  }>all entities</a>.
-              </li>
-            </ul>
           </p>
+          <ul>
+            <li>
+              <code>first_name:Bob</code>: <a
+                href="#"
+                onClick={() => {
+                  dispatch({ ev: Event.QueryChanged, query: "first_name:Bob" })
+                }
+                }>First name contains "Bob"</a>.
+            </li>
+            <li>
+              <code>display_name:"Bob Adams"</code>: <a
+                href="#"
+                onClick={() => {
+                  dispatch({
+                    ev: Event.QueryChanged,
+                    query: 'display_name:"Bob Adams Jr."',
+                  })
+                }
+                }>Display name exactly equals "Bob Adams"</a>.
+            </li>
+            <li>
+              <code>display_name:"ad.*fam"</code>: <a
+                href="#"
+                onClick={() => {
+                  dispatch({
+                    ev: Event.QueryChanged,
+                    query: 'display_name:/ad.*fam/',
+                  })
+                }
+                }>Display name contains "ad" and "fam" with any text in-between</a>.
+            </li>
+            <li>
+              <code>*:*</code> (match-all): <a
+                href="#"
+                onClick={() => {
+                  dispatch({
+                    ev: Event.QueryChanged,
+                    query: '*:*',
+                  })
+                }
+                }>all entities</a>.
+            </li>
+          </ul>
         </div>
-      </div>
+      </div >
     }
   }
 
