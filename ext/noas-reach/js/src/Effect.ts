@@ -59,11 +59,8 @@ function fetchContacts<MsgT>(
       )
   } catch (caught) {
     const error = caught as Error
-    const clientError: Error = {
-      message: `Client error: ${error.message}`,
-      stack: error.stack,
-      name: error.name,
-    }
+    const clientError = structuredClone(error)
+    clientError.message = `Client error: ${error.message}`
     dispatch(onFailure(clientError))
   }
 }
