@@ -80,9 +80,9 @@ export namespace Core {
                   textAlign: 'center',
                 }}
                 onClick={() => {
-                  dispatch({ ev: Event.SearchClicked })
+                  dispatch({ ev: Event.QueryChanged, query: "*:*" })
                 }}>
-                Search
+                All
               </button>
               <button
                 style={{
@@ -90,12 +90,25 @@ export namespace Core {
                   maxWidth: '7em',
                   width: '7em',
                   textAlign: 'center',
-                  marginLeft: ".5em",
+                  marginLeft: ".25em",
                 }}
                 onClick={() => {
                   dispatch({ ev: Event.Reset })
                 }}>
                 Clear
+              </button>
+              <button
+                style={{
+                  display: 'inline',
+                  maxWidth: '7em',
+                  width: '7em',
+                  textAlign: 'center',
+                  marginLeft: "1em",
+                }}
+                onClick={() => {
+                  dispatch({ ev: Event.SearchClicked })
+                }}>
+                Search
               </button>
             </p>
           </div>

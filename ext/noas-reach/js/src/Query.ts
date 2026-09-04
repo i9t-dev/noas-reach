@@ -3,7 +3,7 @@ import { createToken, CstNode, CstParser, EarlyExitException, ILexingResult, IRe
 export namespace Civi {
   export type Operator = "=" | "REGEXP"
   export type Clause = [string, Operator, string]
-  export type Query = { limit: number, where: Clause[] }
+  export type Query = { limit: number, where: Clause[] | undefined }
   export type Failure = {
     error_id: string | undefined,
     error_code: number | undefined,
@@ -28,7 +28,7 @@ const Space = createToken({
 
 const Identifier = createToken({
   name: "Identifier",
-  pattern: /[A-Za-z][A-Za-z0-9\-_]*(?=:)/,
+  pattern: /([A-Za-z][A-Za-z0-9\-_]|\*)*(?=:)/,
 })
 
 const Colon = createToken({ name: "Colon", pattern: /:/, group: Lexer.SKIPPED })
@@ -115,10 +115,19 @@ function parseErrors(errors: IRecognitionException[]) {
 const BaseCstVisitor = parser.getBaseCstVisitorConstructor()
 
 namespace Ast {
-  export type Clause = {
-    key: string,
-    type: "text" | "word" | "regex" | "unknown",
-    value: string,
+  export type Clause =
+    | Match.All
+    | Match.Pattern
+    | Match.Unknown
+
+  export namespace Match {
+    export type All = "match-all"
+    export type Pattern = {
+      key: string,
+      type: "text" | "word" | "regex",
+      value: string,
+    }
+    export type Unknown = "unknown"
   }
 
   export type Query = {
@@ -149,20 +158,20 @@ class CustomCstVisitor extends BaseCstVisitor {
       type: "text",
       value: (ctx.Text[0].image as string)
         .replace(/^["'](.*)["']$/, "$1"),
-    } : ctx.Word ? {
-      key: ctx.Identifier[0].image,
-      type: "word",
-      value: ctx.Word[0].image,
-    } : ctx.Regex ? {
+    } : ctx.Word ? (
+      ctx.Identifier[0].image == '*' &&
+        ctx.Word[0].image == '*' ?
+        "match-all" : {
+          key: ctx.Identifier[0].image,
+          type: "word",
+          value: ctx.Word[0].image,
+        }
+    ) : ctx.Regex ? {
       key: ctx.Identifier[0].image,
       type: "regex",
       value: (ctx.Regex[0].image as string)
         .replace(/^\/(.*)\/$/, "$1"),
-    } : {
-      key: ctx.Identifier[0].image,
-      type: "unknown",
-      value: "TBD",
-    }
+    } : "unknown"
   }
 }
 
@@ -179,7 +188,7 @@ function convert(
   [_status, ast]: [Status.Analyzed, Ast.Query]
 ): [Status.Converted, Civi.Query] {
   const civiWhereClauses = ast.query.clauses
-    .filter((c) => c.type != "unknown")
+    .filter((c) => c != "match-all" && c != "unknown")
     .map((c) => {
       const operators = {
         text: "=",
@@ -193,11 +202,10 @@ function convert(
       } else {
         throw Error(`Query clause type unknown: ${c.type}`)
       }
-
     })
   const result = {
     limit: 25,
-    where: civiWhereClauses
+    where: civiWhereClauses.length == 0 ? undefined :  civiWhereClauses,
   }
   return [Status.Converted, result]
 }

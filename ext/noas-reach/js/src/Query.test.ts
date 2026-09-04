@@ -2,7 +2,7 @@ import { describe, expect, it, jest, test } from "@jest/globals"
 import query from "./Query"
 
 describe("Query", () => {
-  it("tokenizes simple input", () => {
+  it("builds Civi query", () => {
     try {
       const result = query(
         'key1:val1a key2:"val2a val2b val2c" key3:/val3a.*/'
@@ -32,5 +32,9 @@ describe("Query", () => {
         /NoViableAltException: At character 4, after \[key1\] - Expecting: one of these possible Token sequences:\n\s*1\.\s*\[Word\]\n\s*2\.\s*\[Text\]\n\s*3\.\s*\[Regex\]/
       )
     }
+  })
+  it("builds match-all query", () => {
+    const result = query("*:*")
+    expect(result.where).toEqual(undefined)
   })
 })
