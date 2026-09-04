@@ -3,7 +3,6 @@ civicrm.standalone.php
 index.php
 private
 public
-.ddev
 .htaccess
 .vscode
 **/.DS_Store
