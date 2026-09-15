@@ -6,25 +6,16 @@
             '\n',
             contact_type,
             display_name,
-            IF (
-                civicrm_phone.id IS NULL,
-                "Unknown phone",
-                civicrm_phone.phone
-            ),
-            IF (
-                civicrm_email.id IS NULL,
-                "Unknown email",
-                civicrm_email.email
-            ),
-            IF (
-                civicrm_address.id IS NULL,
-                "Unknown address",
+            civicrm_phone.phone,
+            civicrm_email.email,
+            NULLIF(
                 CONCAT_WS (
                     '\n',
                     civicrm_address.street_address,
                     civicrm_address.city,
-                    civicrm_address.country_id
-                )
+                    civicrm_country.name
+                ),
+                ''
             )
         ) AS content
     FROM
@@ -32,6 +23,7 @@
         LEFT OUTER JOIN civicrm_phone ON civicrm_contact.id = civicrm_phone.contact_id
         LEFT OUTER JOIN civicrm_email ON civicrm_contact.id = civicrm_email.contact_id
         LEFT OUTER JOIN civicrm_address ON civicrm_contact.id = civicrm_address.contact_id
+        LEFT OUTER JOIN civicrm_country ON civicrm_country.id = civicrm_address.country_id
     WHERE
         (
             civicrm_phone.is_primary = 1
@@ -55,12 +47,11 @@ UNION
         civicrm_membership.id AS 'entity_id',
         CONCAT_WS (
             '\n',
-            CONCAT_WS (' ', '[Status]', civicrm_membership_status.label),
-            CONCAT_WS (' ', '[Payment]', source),
-            CONCAT_WS (' ', '[Type]', civicrm_membership_type.name),
-            CONCAT_WS (' ', '[Joined]', join_date),
-            CONCAT_WS (' ', "[Start]", start_date),
-            CONCAT_WS (' ', "[End]", end_date)
+            civicrm_membership_type.name,
+            `start_date`,
+            end_date,
+            source,
+            civicrm_membership_status.label
         ) AS content
     FROM
         civicrm_membership
@@ -76,25 +67,15 @@ UNION
         civicrm_contribution.id as 'entity_id',
         CONCAT_WS (
             '\n',
-            CONCAT_WS (
-                ' ',
-                '[Amount]',
-                civicrm_contribution.total_amount
-            ),
-            CONCAT_WS (
-                ' ',
-                '[Transaction]',
-                civicrm_contribution.trxn_id
-            ),
-            CONCAT_WS (
-                ' ',
-                '[Received]',
-                civicrm_contribution.receive_date
-            ) -- ,
-            -- DB stores the payment method options in civicrm_options
-            -- CONCAT_WS (' ', '[Payment]', civicrm_TBD.label),
-            -- CONCAT_WS (' ', '[Type]', civicrm_TBD.label),
+            civicrm_contribution.total_amount,
+            civicrm_contribution.trxn_id,
+            DATE(civicrm_contribution.receive_date),
+            civicrm_option_value.name
         )
     FROM
         civicrm_contribution
+        JOIN civicrm_option_value ON civicrm_contribution.payment_instrument_id = civicrm_option_value.value
+        JOIN civicrm_option_group ON civicrm_option_value.option_group_id = civicrm_option_group.id
+        AND civicrm_option_group.name = 'payment_instrument'
 );
+
