@@ -18,13 +18,15 @@ export function execute<MsgT>(
 ) {
   switch (command.op) {
     case Operation.NoOp: /* No op */ break
-    case Operation.FetchContacts: return fetchContacts(
-      context,
-      command.query,
-      command.onStart,
-      command.onSuccessOf,
-      command.onFailureOf,
-      dispatch)
+    case Operation.FetchContacts:
+      return fetchContacts(
+        context,
+        command.query,
+        command.onStart,
+        command.onSuccessOf,
+        command.onFailureOf,
+        dispatch,
+      )
     case Operation.Log: return log(context, command.message)
   }
 }
