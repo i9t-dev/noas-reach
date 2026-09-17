@@ -1,0 +1,23 @@
+{
+    "name": "i9t-dev/noas-reach",
+    "type": "civicrm-extension",
+    "require": {
+        "civicrm/civicrm-core": "^6.17"
+    },
+    "autoload": {
+        "psr-0": {
+            "CRM_NoasReach_": "CRM/NoasReach/"
+        }
+    },
+    "minimum-stability": "dev",
+    "config": {
+        "allow-plugins": {
+            "cweagans/composer-patches": true,
+            "civicrm/composer-downloads-plugin": true,
+            "civicrm/composer-compile-plugin": true
+        }
+    },
+    "extra": {
+        "compile-whitelist": ["civicrm/civicrm-core", "civicrm/composer-compile-lib"]
+    }
+}
