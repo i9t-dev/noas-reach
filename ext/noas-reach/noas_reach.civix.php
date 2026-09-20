@@ -8,7 +8,7 @@
  */
 class CRM_NoasReach_ExtensionUtil {
   const SHORT_NAME = 'noas_reach';
-  const LONG_NAME = 'noas-reach';
+  const LONG_NAME = 'Noah\'s Reach';
   const CLASS_PREFIX = 'CRM_NoasReach';
 
   /**

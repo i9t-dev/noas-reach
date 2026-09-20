@@ -19,7 +19,7 @@
     <url desc="App Page">/civicrm/app</url>
   </urls>
   <releaseDate>2026-07-11</releaseDate>
-  <version>1.0.0</version>
+  <version>0.0.1-dumb-and-dumber</version>
   <develStage>alpha</develStage>
   <compatibility mode="semver">
     <comments>Semantic versioning. For example, compatibility with "6.1" implies compatibility with "6.2".</comments>
