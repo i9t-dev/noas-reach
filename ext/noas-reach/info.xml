@@ -16,7 +16,7 @@
     <url desc="Documentation">https://github.com/i9t-dev/noas-reach/blob/main/README.md</url>
     <url desc="Support">https://github.com/i9t-dev/noas-reach/issues</url>
     <url desc="Licensing">https://www.gnu.org/licenses/agpl-3.0.html</url>
-    <url desc="App Page">/civicrm/app</url>
+    <url desc="App Page">/civicrm/nr</url>
   </urls>
   <releaseDate>2026-07-11</releaseDate>
   <version>0.0.1-dumb-and-dumber</version>

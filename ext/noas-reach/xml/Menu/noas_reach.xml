@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <menu>
   <item>
-    <path>civicrm/app</path>
+    <path>civicrm/nr</path>
     <page_callback>CRM_NoasReach_Page_App</page_callback>
     <title>Noah's Reach</title>
     <access_arguments>access CiviCRM</access_arguments>
