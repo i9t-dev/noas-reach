@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <extension key="noas-reach" type="module">
   <file>noas_reach</file>
-  <name>Noas-reach</name>
-  <description>A full-text search extension for CiviCRM entities</description>
+  <name>NoasReach</name>
+  <description>Refined search extension for CiviCRM entities</description>
   <license>AGPL-3.0</license>
   <authors>
     <author>
