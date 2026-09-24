@@ -242,7 +242,7 @@ export namespace Core {
                 }>Display name exactly equals "Bob Adams"</a>.
             </li>
             <li>
-              <code>display_name:"ad.*fam"</code>: <a
+              <code>display_name:/ad.*fam/</code>: <a
                 href="#"
                 onClick={() => {
                   dispatch({

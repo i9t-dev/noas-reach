@@ -26,8 +26,7 @@ function noas_reach_civicrm_config(\CRM_Core_Config $config): void
 function noas_reach_civicrm_install(): void
 {
     _noas_reach_civix_civicrm_install();
-
-    Civi::log()->info("[NoasReach] To do: Execute installation script");
+    CRM_NoasReach_DatabaseSetup::install();
 }
 
 /**
@@ -42,8 +41,7 @@ function noas_reach_civicrm_enable(): void
 
 function noas_reach_civicrm_uninstall(): void
 {
-    Civi::log()
-        ->info("[NoasReach] To do: Execute uninstallation script");
+    CRM_NoasReach_DatabaseSetup::uninstall();
 }
 
 function noas_reach_civicrm_post(
