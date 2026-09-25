@@ -1,9 +1,14 @@
-import { createToken, CstNode, CstParser, EarlyExitException, ILexingResult, IRecognitionException, Lexer, MismatchedTokenException, NoViableAltException } from "chevrotain"
+import { createToken, CstNode, CstParser, EarlyExitException, ILexingResult, IRecognitionException, Lexer, MismatchedTokenException, NoViableAltException, Option } from "chevrotain"
 
 export namespace Civi {
   export type Operator = "=" | "REGEXP"
   export type Clause = [string, Operator, string]
-  export type Query = { limit: number, where: Clause[] | undefined }
+  export type Options = { limit: number, where: Clause[] | undefined }
+  export type Query = {
+    endpoint: 'Contact' | 'Content',
+    method: 'GET',
+    options: Options
+  }
   export type Failure = {
     error_id: string | undefined,
     error_code: number | undefined,
@@ -203,9 +208,13 @@ function convert(
         throw Error(`Query clause type unknown: ${c.type}`)
       }
     })
-  const result = {
-    limit: 25,
-    where: civiWhereClauses.length == 0 ? undefined :  civiWhereClauses,
+  const result: Civi.Query = {
+    endpoint: 'Contact',
+    method: 'GET',
+    options: {
+      limit: 25,
+      where: civiWhereClauses.length == 0 ? undefined : civiWhereClauses,
+    },
   }
   return [Status.Converted, result]
 }

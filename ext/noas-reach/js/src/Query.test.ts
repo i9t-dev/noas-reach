@@ -10,12 +10,16 @@ describe("Query", () => {
       const stringified = JSON.stringify(result, null, 2)
       console.log(stringified, null, 2)
       expect(result).toEqual({
-        limit: 25,
-        where: [
-          ["key1", "CONTAINS", "val1a"],
-          ["key2", "=", "val2a val2b val2c"],
-          ["key3", "REGEXP", "val3a.*"],
-        ]
+        endpoint: "Contact",
+        method: "GET",
+        options: {
+          limit: 25,
+          where: [
+            ["key1", "CONTAINS", "val1a"],
+            ["key2", "=", "val2a val2b val2c"],
+            ["key3", "REGEXP", "val3a.*"],
+          ]
+        },
       })
     } catch (error) {
       console.log(error)
@@ -35,6 +39,26 @@ describe("Query", () => {
   })
   it("builds match-all query", () => {
     const result = query("*:*")
-    expect(result.where).toEqual(undefined)
+    expect(result).toEqual({
+      endpoint: "Contact",
+      method: "GET",
+      options: {
+        limit: 25,
+        where: undefined,
+      },
+    })
   })
+  /* it("builds full-text query", () => {
+    const result = query("The five boxing wizards jump quickly")
+    expect(result).toEqual({
+      endpoint: "Content",
+      method: "GET",
+      options: {
+        limit: 25,
+        where: [
+          ["content", "CONTAINS", "The five boxing wizards jump quickly"],
+        ]
+      },
+    })
+  }) */
 })
