@@ -22,7 +22,13 @@ class CRM_NoasReach_DatabaseSetup
 
     public static function uninstall()
     {
-        Civi::log()
-            ->info("[" . TAG . "] Executing uninstallation script");
+        $sqlScriptPath = E::path(
+            "sql" . DIRECTORY_SEPARATOR . "auto-uninstall.sql"
+        );
+        $tag = TAG;
+        Civi::log()->info(
+            "[$tag] Executing uninstallation script: $sqlScriptPath"
+        );
+        CRM_Utils_File::sourceSQLFile(CIVICRM_DSN, $sqlScriptPath);
     }
 }
