@@ -1,5 +1,5 @@
 import { describe, expect, it, jest, test } from "@jest/globals"
-import query from "./Query"
+import query, { Ast } from "./Query"
 
 describe("Query", () => {
   it("builds Civi query", () => {
@@ -48,17 +48,26 @@ describe("Query", () => {
       },
     })
   })
-  /* it("builds full-text query", () => {
-    const result = query("The five boxing wizards jump quickly")
-    expect(result).toEqual({
-      endpoint: "Content",
-      method: "GET",
-      options: {
-        limit: 25,
-        where: [
-          ["content", "CONTAINS", "The five boxing wizards jump quickly"],
-        ]
-      },
-    })
-  }) */
+  // it("builds full-text query", () => {
+  //   const result = query("The five boxing wizards jump quickly")
+  //   expect(result).toEqual({
+  //     endpoint: "Content",
+  //     method: "GET",
+  //     options: {
+  //       limit: 25,
+  //       where: [
+  //         ["content", "CONTAINS", "The five boxing wizards jump quickly"],
+  //       ]
+  //     },
+  //   })
+  // })
+  it("checks field instance", () => {
+    const isBeingField = Ast.Match
+      .isField({
+        "key": "key1",
+        "type": "word",
+        "value": "val1a"
+      })
+    expect(isBeingField).toBe(true)
+  })
 })

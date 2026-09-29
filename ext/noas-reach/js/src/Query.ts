@@ -37,8 +37,10 @@ const Identifier = createToken({
 })
 
 const Colon = createToken({ name: "Colon", pattern: /:/, group: Lexer.SKIPPED })
+/** Quoted text */
 const Text = createToken({ name: "Text", pattern: /["'][^"']*["']/ })
 const Regex = createToken({ name: "Regex", pattern: /\/[^\/]*\// })
+/** Single unquoted word */
 const Word = createToken({ name: "Word", pattern: /[^'"\/\s]+/ })
 
 const allTokens = [Space, Colon, Text, Regex, Identifier, Word]
@@ -70,11 +72,26 @@ class QueryParser extends CstParser {
       })
     })
     this.RULE("clause", () => {
-      this.CONSUME(Identifier)
       this.OR([
-        { ALT: () => this.CONSUME(Word) },
-        { ALT: () => this.CONSUME(Text) },
-        { ALT: () => this.CONSUME(Regex) },
+        { // Field clause
+          ALT: () => {
+            this.CONSUME(Identifier)
+            this.OR2([
+              { ALT: () => this.CONSUME(Word) },
+              { ALT: () => this.CONSUME(Text) },
+              { ALT: () => this.CONSUME(Regex) },
+            ])
+          }
+        },
+        { // Content clause
+          ALT: () => {
+            this.AT_LEAST_ONE({
+              DEF: () => {
+                this.CONSUME2(Word)
+              }
+            })
+          }
+        },
       ])
     })
     this.performSelfAnalysis()
@@ -119,20 +136,53 @@ function parseErrors(errors: IRecognitionException[]) {
 
 const BaseCstVisitor = parser.getBaseCstVisitorConstructor()
 
-namespace Ast {
+export namespace Ast {
   export type Clause =
+    | Match.Content
+    | Match.Field
     | Match.All
-    | Match.Pattern
     | Match.Unknown
 
   export namespace Match {
     export type All = "match-all"
-    export type Pattern = {
+    export type Content = { content: string }
+    export type Field = {
       key: string,
       type: "text" | "word" | "regex",
       value: string,
     }
     export type Unknown = "unknown"
+
+    export function isContent(c: Clause): c is Content {
+      return (
+        typeof c == "object" &&
+        "content" in c &&
+        typeof c.content == "string"
+      )
+    }
+
+    export function isField(c: Clause): c is Field {
+      return (
+        typeof c == "object" &&
+        hasStrKey(c) &&
+        hasStrType(c) &&
+        hasStrValue(c)
+      )
+    }
+
+    function hasStrKey(c: object): boolean {
+      return "key" in c && typeof c.key == "string"
+    }
+
+    function hasStrValue(c: object): boolean {
+      return "value" in c && typeof c.value == "string"
+    }
+
+    function hasStrType(c: object): boolean {
+      return "type" in c &&
+      typeof c.type == "string" &&
+      ["text", "word", "regex"].find((t) => t == c.type) != undefined
+    }
   }
 
   export type Query = {
@@ -158,25 +208,59 @@ class CustomCstVisitor extends BaseCstVisitor {
   }
 
   clause(ctx: any): Ast.Clause {
-    return ctx.Text ? {
-      key: ctx.Identifier[0].image,
-      type: "text",
-      value: (ctx.Text[0].image as string)
-        .replace(/^["'](.*)["']$/, "$1"),
-    } : ctx.Word ? (
-      ctx.Identifier[0].image == '*' &&
-        ctx.Word[0].image == '*' ?
-        "match-all" : {
-          key: ctx.Identifier[0].image,
-          type: "word",
-          value: ctx.Word[0].image,
-        }
-    ) : ctx.Regex ? {
-      key: ctx.Identifier[0].image,
-      type: "regex",
-      value: (ctx.Regex[0].image as string)
-        .replace(/^\/(.*)\/$/, "$1"),
-    } : "unknown"
+    if (ctx.Identifier) {
+      return fieldClauseToAst(ctx)
+    } else if (ctx.Word) {
+      return contentClauseToAst(ctx)
+    } else {
+      return "unknown"
+    }
+  }
+}
+
+function fieldClauseToAst(ctx: any): Ast.Clause {
+  return (
+    ctx.Text ? textClauseToAst(ctx) :
+      ctx.Word ? wordClauseToAst(ctx) :
+        ctx.Regex ? regexClauseToAst(ctx) :
+          "unknown"
+  )
+}
+
+function textClauseToAst(ctx: any): Ast.Match.Field {
+  return {
+    key: ctx.Identifier[0].image,
+    type: "text",
+    value: (ctx.Text[0].image as string)
+      .replace(/^["'](.*)["']$/, "$1"),
+  }
+}
+
+function wordClauseToAst(ctx: any): Ast.Match.All | Ast.Match.Field {
+  return (
+    ctx.Identifier[0].image == '*' && ctx.Word[0].image == '*' ? "match-all" :
+      {
+        key: ctx.Identifier[0].image,
+        type: "word",
+        value: ctx.Word[0].image,
+      }
+  )
+}
+
+function regexClauseToAst(ctx: any): Ast.Match.Field {
+  return {
+    key: ctx.Identifier[0].image,
+    type: "regex",
+    value: (ctx.Regex[0].image as string)
+      .replace(/^\/(.*)\/$/, "$1"),
+  }
+}
+
+function contentClauseToAst(ctx: any): Ast.Clause {
+  return {
+    content: ctx.Word
+      .map((w: any) => w.image as string)
+      .join(" ")
   }
 }
 
@@ -193,19 +277,19 @@ function convert(
   [_status, ast]: [Status.Analyzed, Ast.Query]
 ): [Status.Converted, Civi.Query] {
   const civiWhereClauses = ast.query.clauses
-    .filter((c) => c != "match-all" && c != "unknown")
-    .map((c) => {
+    .filter((clause) => Ast.Match.isField(clause))
+    .map((clause) => {
       const operators = {
         text: "=",
         word: "CONTAINS",
         regex: "REGEXP",
         unknown: undefined,
       }
-      const op = operators[c.type]
+      const op = operators[clause.type]
       if (op) {
-        return [c.key, op, c.value] as [string, Civi.Operator, string]
+        return [clause.key, op, clause.value] as [string, Civi.Operator, string]
       } else {
-        throw Error(`Query clause type unknown: ${c.type}`)
+        throw Error(`Query clause type unknown: ${clause.type}`)
       }
     })
   const result: Civi.Query = {
