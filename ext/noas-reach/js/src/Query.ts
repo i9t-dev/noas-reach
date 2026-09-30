@@ -6,7 +6,7 @@ export namespace Civi {
   export type Options = { limit: number, where: Clause[] | undefined }
   export type Query = {
     endpoint: 'Contact' | 'Content',
-    method: 'GET',
+    method: 'get',
     options: Options
   }
   export type Failure = {
@@ -294,7 +294,7 @@ function convert(
     })
   const result: Civi.Query = {
     endpoint: 'Contact',
-    method: 'GET',
+    method: 'get',
     options: {
       limit: 25,
       where: civiWhereClauses.length == 0 ? undefined : civiWhereClauses,

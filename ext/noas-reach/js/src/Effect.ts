@@ -6,7 +6,7 @@ export interface Context {
   callCivi: (
     endpoint: 'Contact',
     method: 'get',
-    options: Civi.Query
+    options: Civi.Options
   ) => Promise<CiviContact[]>,
   log: (text: string) => void,
 }
@@ -50,15 +50,17 @@ function fetchContacts<MsgT>(
     const civiQuery = Query(query)
     context.log(`Parsed query to: ${JSON.stringify(civiQuery, null, 2)}`)
     context.log(`Fetching contacts for parsed query`)
-    context.callCivi('Contact', 'get', civiQuery)
-      .then(
-        (remoteContacts) => dispatch(onSuccess(remoteContacts)),
-        (remoteFailure: Civi.Failure) => {
-          const message = `Server error (code: [${remoteFailure.error_code}], id: [${remoteFailure.error_id}], message: [${remoteFailure.error_message}], status: [${remoteFailure.status}])`
-          const error = Error(message)
-          dispatch(onFailure(error))
-        },
-      )
+    if (civiQuery.endpoint == "Contact") {
+      context.callCivi(civiQuery.endpoint, civiQuery.method, civiQuery.options)
+        .then(
+          (remoteContacts) => dispatch(onSuccess(remoteContacts)),
+          (remoteFailure: Civi.Failure) => {
+            const message = `Server error (code: [${remoteFailure.error_code}], id: [${remoteFailure.error_id}], message: [${remoteFailure.error_message}], status: [${remoteFailure.status}])`
+            const error = Error(message)
+            dispatch(onFailure(error))
+          },
+        )
+    }
   } catch (caught) {
     const error = caught as Error
     const clientError = structuredClone(error)

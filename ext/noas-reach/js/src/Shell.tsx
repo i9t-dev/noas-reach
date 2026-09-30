@@ -19,7 +19,7 @@ const context = {
   callCivi: (
     endpoint: string,
     method: string,
-    options: (Civi.Query)) => window.CRM.api4(endpoint, method, options)
+    options: (Civi.Options)) => window.CRM.api4(endpoint, method, options)
 }
 
 const Shell = () => {
