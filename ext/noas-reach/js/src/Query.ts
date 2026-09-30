@@ -1,4 +1,15 @@
-import { createToken, CstNode, CstParser, EarlyExitException, ILexingResult, IRecognitionException, Lexer, MismatchedTokenException, NoViableAltException, Option } from "chevrotain"
+import {
+  createToken,
+  CstNode,
+  CstParser,
+  ILexingResult,
+  IRecognitionException,
+  Lexer,
+  MismatchedTokenException,
+  NoViableAltException,
+} from "chevrotain"
+
+//#region Model
 
 export namespace Civi {
   export type Operator = "=" | "REGEXP"
@@ -25,6 +36,18 @@ enum Status {
   Converted,
 }
 
+//#endregion
+
+//#region Init
+
+function init(query: string): [Status.Initialized, string] {
+  return [Status.Initialized, query]
+}
+
+//#endregion
+
+//#region Tokenize
+
 const Space = createToken({
   name: "Space",
   pattern: /\s+/,
@@ -47,17 +70,17 @@ const allTokens = [Space, Colon, Text, Regex, Identifier, Word]
 
 const lexer = new Lexer(allTokens)
 
-type Cst = CstNode
-
-function init(query: string): [Status.Initialized, string] {
-  return [Status.Initialized, query]
-}
-
 function tokenize(
   [_status, initialQuery]: [Status.Initialized, string]
 ): [Status.Tokenized, ILexingResult] {
   return [Status.Tokenized, lexer.tokenize(initialQuery)]
 }
+
+//#endregion
+
+//#region Parse
+
+type Cst = CstNode
 
 type CstNodeSupplier = () => CstNode
 
@@ -134,6 +157,10 @@ function parseErrors(errors: IRecognitionException[]) {
   return msg
 }
 
+//#endregion
+
+//#region Analyze
+
 const BaseCstVisitor = parser.getBaseCstVisitorConstructor()
 
 export namespace Ast {
@@ -180,8 +207,8 @@ export namespace Ast {
 
     function hasStrType(c: object): boolean {
       return "type" in c &&
-      typeof c.type == "string" &&
-      ["text", "word", "regex"].find((t) => t == c.type) != undefined
+        typeof c.type == "string" &&
+        ["text", "word", "regex"].find((t) => t == c.type) != undefined
     }
   }
 
@@ -273,6 +300,10 @@ function analyze(
   return [Status.Analyzed, ast]
 }
 
+//#endregion
+
+//#region Convert
+
 function convert(
   [_status, ast]: [Status.Analyzed, Ast.Query]
 ): [Status.Converted, Civi.Query] {
@@ -303,6 +334,10 @@ function convert(
   return [Status.Converted, result]
 }
 
+//#endregion
+
+//#region Exports
+
 export default function (query: string): Civi.Query {
   console.log("Initializing...")
   const initialized = init(query)
@@ -327,3 +362,5 @@ export default function (query: string): Civi.Query {
   const [_conversionStatus, civiQuery] = converted
   return civiQuery
 }
+
+//#endregion
