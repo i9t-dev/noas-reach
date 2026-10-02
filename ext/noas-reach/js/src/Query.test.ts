@@ -11,7 +11,7 @@ describe("Query", () => {
       console.log(stringified, null, 2)
       expect(result).toEqual({
         endpoint: "Contact",
-        method: "GET",
+        method: "get",
         options: {
           limit: 25,
           where: [
@@ -41,18 +41,18 @@ describe("Query", () => {
     const result = query("*:*")
     expect(result).toEqual({
       endpoint: "Contact",
-      method: "GET",
+      method: "get",
       options: {
         limit: 25,
         where: undefined,
       },
     })
   })
-  // it("builds full-text query", () => {
+  // it("builds content query", () => {
   //   const result = query("The five boxing wizards jump quickly")
   //   expect(result).toEqual({
   //     endpoint: "Content",
-  //     method: "GET",
+  //     method: "get",
   //     options: {
   //       limit: 25,
   //       where: [

@@ -56,7 +56,7 @@ const Space = createToken({
 
 const Identifier = createToken({
   name: "Identifier",
-  pattern: /([A-Za-z][A-Za-z0-9\-_]|\*)*(?=:)/,
+  pattern: /([A-Za-z]([A-Za-z0-9\-_])*|\*)(?=:)/,
 })
 
 const Colon = createToken({ name: "Colon", pattern: /:/, group: Lexer.SKIPPED })
@@ -66,7 +66,7 @@ const Regex = createToken({ name: "Regex", pattern: /\/[^\/]*\// })
 /** Single unquoted word */
 const Word = createToken({ name: "Word", pattern: /[^'"\/\s]+/ })
 
-const allTokens = [Space, Colon, Text, Regex, Identifier, Word]
+const allTokens = [Colon, Identifier, Text, Regex, Word, Space]
 
 const lexer = new Lexer(allTokens)
 
@@ -310,19 +310,24 @@ function convert(
   const civiWhereClauses = ast.query.clauses
     .filter((clause) => Ast.Match.isField(clause))
     .map((clause) => {
-      const operators = {
-        text: "=",
-        word: "CONTAINS",
-        regex: "REGEXP",
-        unknown: undefined,
-      }
-      const op = operators[clause.type]
-      if (op) {
-        return [clause.key, op, clause.value] as [string, Civi.Operator, string]
+      if (Ast.Match.isField(clause)) {
+        const operators = {
+          text: "=",
+          word: "CONTAINS",
+          regex: "REGEXP",
+          unknown: undefined,
+        }
+        const op = operators[clause.type]
+        if (op) {
+          return [clause.key, op, clause.value] as [string, Civi.Operator, string]
+        } else {
+          throw Error(`Query clause type unknown: ${clause.type}`)
+        }
       } else {
-        throw Error(`Query clause type unknown: ${clause.type}`)
+        return undefined
       }
     })
+    .filter((whereClause) => whereClause != undefined)
   const result: Civi.Query = {
     endpoint: 'Contact',
     method: 'get',
