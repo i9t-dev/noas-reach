@@ -10,15 +10,49 @@ describe("Query", () => {
       const stringified = JSON.stringify(result, null, 2)
       console.log(stringified, null, 2)
       expect(result).toEqual({
-        endpoint: "Contact",
+        endpoint: "Content",
         method: "get",
         options: {
           limit: 25,
-          where: [
-            ["key1", "CONTAINS", "val1a"],
-            ["key2", "=", "val2a val2b val2c"],
-            ["key3", "REGEXP", "val3a.*"],
-          ]
+          join: [
+            ["Contact AS c",
+              "LEFT", [
+                ["entity_type", "=", "'Contact'"],
+                ["c.id", "=", "entity_id"],
+              ],
+            ],
+            ["Membership AS m",
+              "LEFT", [
+                ["entity_type", "=", "'Membership'"],
+                ["m.id", "=", "entity_id"],
+              ],
+            ],
+            ["Subscription AS s",
+              "LEFT", [
+                ["entity_type", "=", "'Subscription'"],
+                ["s.id", "=", "entity_id"],
+              ],
+            ],
+          ],
+          where:
+            [
+              "OR",
+              [
+                ["c.key1", "CONTAINS", "val1a"],
+                ["c.key2", "=", "val2a val2b val2c"],
+                ["c.key3", "REGEXP", "val3a.*"],
+              ],
+              [
+                ["m.key1", "CONTAINS", "val1a"],
+                ["m.key2", "=", "val2a val2b val2c"],
+                ["m.key3", "REGEXP", "val3a.*"],
+              ],
+              [
+                ["s.key1", "CONTAINS", "val1a"],
+                ["s.key2", "=", "val2a val2b val2c"],
+                ["s.key3", "REGEXP", "val3a.*"],
+              ],
+            ],
         },
       })
     } catch (error) {
@@ -62,12 +96,12 @@ describe("Query", () => {
   //   })
   // })
   it("checks field instance", () => {
-    const isBeingField = Ast.Match
-      .isField({
-        "key": "key1",
-        "type": "word",
-        "value": "val1a"
-      })
-    expect(isBeingField).toBe(true)
+    const clause: Ast.Clause = {
+      "key": "key1",
+      "type": "word",
+      "value": "val1a"
+    }
+    const isFieldClause = Ast.Match.isField(clause)
+    expect(isFieldClause).toBeTruthy()
   })
 })
