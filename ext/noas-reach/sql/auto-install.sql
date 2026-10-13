@@ -1,17 +1,18 @@
-DROP TABLE IF EXISTS noasreach_entity_contents;
+DROP TABLE IF EXISTS civicrm_nr_content;
 
-CREATE TABLE noasreach_entity_contents (
+CREATE TABLE civicrm_nr_content (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     entity_type VARCHAR(32) NOT NULL,
     entity_id INT NOT NULL,
     content TEXT,
-    PRIMARY KEY (entity_id, entity_type),
     FULLTEXT (content)
 );
 
 INSERT INTO
-    noasreach_entity_contents (
+    civicrm_nr_content (
         (
             SELECT
+                NULL AS 'id',
                 'Contact' AS 'entity_type',
                 civicrm_contact.id AS 'entity_id',
                 CONCAT_WS (
@@ -55,6 +56,7 @@ INSERT INTO
         UNION
         (
             SELECT
+                NULL AS 'id',
                 'Membership' AS 'entity_type',
                 civicrm_membership.id AS 'entity_id',
                 CONCAT_WS (
@@ -75,6 +77,7 @@ INSERT INTO
         UNION
         (
             SELECT
+                NULL AS 'id',
                 'Contribution' as 'entity_type',
                 civicrm_contribution.id as 'entity_id',
                 CONCAT_WS (
