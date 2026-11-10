@@ -52,13 +52,14 @@ function noas_reach_civicrm_post(
     ?array $params = NULL
 ): void {
     $paramsStr = join(", ", $params);
+    $objectStr = print_r($objectRef, true);
     Civi::log()->info(
         <<<EOF
             [NoasReach] To do: Update full-text contents table
             [NoasReach] - Op: $action 
             [NoasReach] - Object name: $entity
             [NoasReach] - Object ID: $id
-            [NoasReach] - Object ref: $objectRef
+            [NoasReach] - Object ref: $objectStr
             [NoasReach] - Params: [$paramsStr]
             EOF
     );
