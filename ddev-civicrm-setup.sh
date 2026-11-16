@@ -11,6 +11,7 @@ CIVICRM_VERSION=6.17.3
 CLI_TOOLS_VERSION=v2026.03.20.1773986462
 
 echo "Setting up DDEV... "
+cp .ddev/config-base.yml .ddev/config.yml
 ddev config --project-type=php --composer-root=core --upload-dirs=public/media
 ddev start -y
 

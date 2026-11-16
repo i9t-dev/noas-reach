@@ -1,4 +1,4 @@
-name: noas-reach
+#name: noas-reach # Overriden when running init
 type: php
 docroot: ""
 php_version: "8.3"
