@@ -19,7 +19,7 @@
     <url desc="App Page">/civicrm/find-contents</url>
   </urls>
   <releaseDate>2026-11-16</releaseDate>
-  <version>0.1.0+restrained-stomatopod</version>
+  <version>0.1.1-dev</version>
   <develStage>alpha</develStage>
   <classloader>
     <psr0 prefix="CRM_" path="."/>
