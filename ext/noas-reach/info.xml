@@ -16,28 +16,11 @@
     <url desc="Documentation">https://github.com/i9t-dev/noas-reach/blob/main/README.md</url>
     <url desc="Support">https://github.com/i9t-dev/noas-reach/issues</url>
     <url desc="Licensing">https://www.gnu.org/licenses/agpl-3.0.html</url>
-    <url desc="App Page">/civicrm/nr</url>
+    <url desc="App Page">/civicrm/find-contents</url>
   </urls>
-  <releaseDate>2026-07-11</releaseDate>
-  <version>0.0.1-dumb-and-dumber</version>
+  <releaseDate>2026-11-16</releaseDate>
+  <version>0.1.0+restrained-stomatopod</version>
   <develStage>alpha</develStage>
-  <compatibility mode="semver">
-    <comments>Semantic versioning. For example, compatibility with "6.1" implies compatibility with "6.2".</comments>
-    <ver>6.16</ver>
-  </compatibility>
-  <php_compatibility mode="list">
-    <comments>Listed versions. For example, specify both "8.1" and "8.2".</comments>
-    <ver>8.0</ver>
-    <ver>8.1</ver>
-    <ver>8.2</ver>
-    <ver>8.3</ver>
-    <ver>8.4</ver>
-  </php_compatibility>
-  <smarty_compatibility mode="list">
-    <comments>Listed versions. For example, specify both "4" and "5".</comments>
-    <ver>5</ver>
-  </smarty_compatibility>
-  <!-- <comments>TBD</comments> -->
   <classloader>
     <psr0 prefix="CRM_" path="."/>
     <psr4 prefix="Civi\" path="Civi"/>
