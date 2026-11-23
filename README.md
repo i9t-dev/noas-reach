@@ -8,7 +8,7 @@ See <https://i9t-dev.github.io/noas-reach>.
 Set up the base [CiviCRM](https://civicrm.org/) instance using [DDEV](https://ddev.com/):
 
 ```shell-session
-chrp@macbook-pro-de-christophe noas-reach % ./ddev-civicrm-setup.sh
+chrp@macbook-pro-de-christophe noas-reach % ./scripts/ddev-civicrm-setup.sh
 Configuring a 'php' project named 'noas-reach' with docroot '' at '/Users/chrp/Workspaces/noas-reach'.
 For full details use 'ddev describe'.
 [...]
