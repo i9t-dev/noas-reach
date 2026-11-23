@@ -11,3 +11,4 @@ ext/noas-reach/node_modules
 ext/noas-reach/js/dist
 .ddev
 vendor
+ext/dist
