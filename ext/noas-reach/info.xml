@@ -18,7 +18,7 @@
     <url desc="Licensing">https://www.gnu.org/licenses/agpl-3.0.html</url>
     <url desc="App Page">/civicrm/find-contents</url>
   </urls>
-  <releaseDate>2026-11-16</releaseDate>
+  <releaseDate>2026-11-23</releaseDate>
   <version>0.1.1+cohesive-shrimp</version>
   <develStage>alpha</develStage>
   <classloader>
