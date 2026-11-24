@@ -63,14 +63,35 @@
             Noas-reach is a full-text CiviCRM search extension.
         </blockquote>
 
+        <p>Noas-reach aims to augment the standard search features of CiviCRM, on top of the FormBuilder and SearchKit
+            extensions.</p>
+        <p>It adds an entity search form with a single "content" field. This new form allows to search for entities
+            matching the given content.</p>
+        <p>By using FormBuilder and SearchKit, NoasReach exposes a form that you can configure like any other standard
+            CiviCRM form: Add fields, change appearance, change the search logic, reuse the form anywhere in the CiviCRM
+            interface...</p>
+
         Features (✅: implemented, 🚧: work in progress, 🔮: planned):
 
         <ul>
-            <li>✅ Search CiviCRM contacts</li>
+            <li>✅ Search through all CiviCRM entities: contacts, donations, memberships, events, etc.</li>
             <li>✅ Show entities corresponding to a search query</li>
-            <li>🚧 Handle a subset of the search syntax of Apache Lucene, including:
+            <li>✅ Find entities via a dynamic search form</li>
+            <li>✅ Present search results as a table</li>
+            <li>✅ Allow the user to modify the search form using the CiviCRM interface</li>
+            <li>✅ Allow the user to manipulate the entity search form as any FormBuilder form: Add columns, change its style, integrate it into custom reports...</li>
+            <li>✅ Search through all text fields of managed entities: name, address, email, phone, etc.</li>
+            <li>✅ Index entities at installation time</li>
+            <li>🔮 Update the indexed entities automatically when they change: creation, update, deletion</li>
+            <li>🔮 For each entity in the search results, show a link to the entity</li>
+            <li>🔮 When clicking the link to an entity, open a CiviCRM page to view the entity</li>
+            <li>🔮 Run an advanced full-text search query</li>
+            <li>🔮 Perform advanced view operations: filtering, ordering, grouping</li>
+            <!--
+            <li>🔮 Handle a subset of the search syntax of Apache Lucene, including:
                 <ul>
-                    <li>Full-text search: <code>Bob Smith</code> searches for "Bob Smith" through all CiviCRM text fields</li>
+                    <li>Full-text search: <code>Bob Smith</code> searches for "Bob Smith" through all CiviCRM text
+                        fields</li>
                     <li>Unquoted terms: <code>first_name:Bob</code></li>
                     <li>Quoted phrases: <code>display_name:"Bob Smith"</code></li>
                     <li>Regular expressions: <code>email:/.*smith@gmail\.com$/</code></li>
@@ -81,21 +102,45 @@
                     <li>Match-all clause: <code>*:*</code> shows all entities</li>
                 </ul>
             </li>
-            <li>🚧 Find entities via a dynamic search form</li>
-            <li>🚧 Present search results as a table</li>
-            <li>🔮 Search through all CRM entities: contacts, donations, memberships, events, etc.</li>
-            <li>🔮 Perform advanced view operations: filtering, ordering, grouping</li>
+            -->
         </ul>
     </div>
 
 
     <h2>Install</h2>
 
-    TBD
+    <ul>
+        <li>
+            Download the extension package from <a href="https://github.com/i9t-dev/noas-reach/releases">the release
+                page</a>
+        </li>
+        <li>
+            Copy the <code>noas-reach-X.Y.Z+VERSION-NAME.tar.gz</code> file
+            to the <code>ext</code> directory of your CiviCRM instance
+        </li>
+        <li>
+            In the CiviCRM interface, open the Administer / System Settings / Extensions page from the top-bar menu
+        </li>
+        <li>Click the "add new" button to show the list of installable extensions</li>
+        <li>Search "noa" to find this extension in the list</li>
+        <li>Click the "install" button and complete the installation process</li>
+    </ul>
 
     <h2>Use</h2>
 
-    TBD
+    <p>
+        By default, installing the extension adds a new item in the search menu of the top bar, named "find contents".
+        Click this menu item to open the new content-search form of this extension.
+    </p>
+
+    <p>
+        The search form contains a single content field. Input a text search query to specify the text content you seek.
+    </p>
+
+    <p>
+        A table shows the list of all the entities that contain a text field that matches your query.
+        By default, the list shows all the entities in the database.
+    </p>
 
     <h2>Hack</h2>
 
