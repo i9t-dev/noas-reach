@@ -51,7 +51,11 @@ function noas_reach_civicrm_post(
     mixed &$objectRef = NULL,
     ?array $params = NULL
 ): void {
-    $paramsStr = join(", ", $params);
+    if ($params == null) {
+        $paramsStr = "null";
+    } else {
+        $paramsStr = join(", ", $params);
+    }
     $objectStr = print_r($objectRef, true);
     Civi::log()->info(
         <<<EOF
