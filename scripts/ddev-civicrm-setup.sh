@@ -2,11 +2,8 @@
 
 set -euo pipefail
 
-# CIVICRM_VERSION=STABLE
-
-# Version 6.17.3 from 2026-08-26
-# See https://download.civicrm.org/release/6.17.3
-CIVICRM_VERSION=6.17.3
+# https://download.civicrm.org/release/6.20.2
+CIVICRM_VERSION=6.20.2
 
 CLI_TOOLS_VERSION=v2026.03.20.1773986462
 
@@ -33,5 +30,3 @@ ddev exec cv core:install \
     -m extras.adminPass=admin \
     -m extras.adminEmail=root@localhost
 echo "Core installed"
-
-#ddev launch

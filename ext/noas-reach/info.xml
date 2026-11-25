@@ -18,7 +18,7 @@
     <url desc="Licensing">https://www.gnu.org/licenses/agpl-3.0.html</url>
     <url desc="App Page">/civicrm/find-contents</url>
   </urls>
-  <releaseDate>2026-11-23</releaseDate>
+  <releaseDate>TBD</releaseDate>
   <version>0.1.2-dev</version>
   <develStage>alpha</develStage>
   <classloader>
