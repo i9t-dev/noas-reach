@@ -19,7 +19,7 @@
     <url desc="App Page">/civicrm/find-contents</url>
   </urls>
   <releaseDate>2026-11-23</releaseDate>
-  <version>0.1.1+cohesive-shrimp</version>
+  <version>0.1.2-dev</version>
   <develStage>alpha</develStage>
   <classloader>
     <psr0 prefix="CRM_" path="."/>
