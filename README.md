@@ -25,7 +25,10 @@ Set up the `/etc/hosts` file, to ensure the development environment works offlin
 % ddev hostname
 
 'ddev hostname ' must be run with administrator privileges
-chrp@macbook-pro-de-christophe noas-reach % sudo ddev hostname
+
+% sudo ddev hostname
+
 Invalid arguments supplied. Please use 'ddev hostname [hostname] [ip]'
-chrp@macbook-pro-de-christophe noas-reach % sudo ddev hostname noas-reach.ddev.site 127.0.0.1
+
+% sudo ddev hostname noas-reach.ddev.site 127.0.0.1
 ```
