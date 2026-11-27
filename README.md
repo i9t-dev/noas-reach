@@ -8,7 +8,8 @@ See <https://i9t-dev.github.io/noas-reach>.
 Set up the base [CiviCRM](https://civicrm.org/) instance using [DDEV](https://ddev.com/):
 
 ```shell-session
-chrp@macbook-pro-de-christophe noas-reach % ./scripts/ddev-civicrm-setup.sh
+% ./scripts/ddev-civicrm-setup.sh
+
 Configuring a 'php' project named 'noas-reach' with docroot '' at '/Users/chrp/Workspaces/noas-reach'.
 For full details use 'ddev describe'.
 [...]
@@ -21,7 +22,8 @@ Creating civicrm_* database tables in db
 Set up the `/etc/hosts` file, to ensure the development environment works offline:
 
 ```shell-session
-chrp@macbook-pro-de-christophe noas-reach % ddev hostname
+% ddev hostname
+
 'ddev hostname ' must be run with administrator privileges
 chrp@macbook-pro-de-christophe noas-reach % sudo ddev hostname
 Invalid arguments supplied. Please use 'ddev hostname [hostname] [ip]'
